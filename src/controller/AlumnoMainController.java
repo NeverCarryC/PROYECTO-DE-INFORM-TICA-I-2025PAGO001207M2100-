@@ -46,7 +46,7 @@ public class AlumnoMainController {
 							Parent view = loader.load();
 							 rootPane.setCenter(view);
 						} catch (IOException e) {
-							// TODO Auto-generated catch block
+						
 							e.printStackTrace();
 						}
 
