@@ -90,6 +90,42 @@ public class UnidadCRUD {
 	    return null;
 	}
 
-
+	public static boolean deleteUnidad(int id) {
+		boolean deleted = false;
+		String sql = "DELETE FROM modelo_gestion.unidad WHERE id=?;";
+		Connection conn = ConexionDB.conectar();
+		try {
+			PreparedStatement pstmt =conn.prepareStatement(sql);
+			pstmt.setInt(1, id);
+			int rowsAffected = pstmt.executeUpdate();
+			if(rowsAffected > 0) {
+				deleted = true;
+				System.out.println("Registro con ID " + id +" unidad eliminado correctamente");
+			}else {
+				System.out.println("No se encontró ningún registro con ID " + id  + " para eliminar.");
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return deleted;
+	}
+	public static boolean updateUnidad(int id, String nombre, String descrip) {
+		boolean success = false;
+		String sql = "UPDATE modelo_gestion.unidad SET nombre=?, descripcion=? WHERE id=?;";
+		Connection conn =  ConexionDB.conectar();
+		try {
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, nombre);      // 对应 SQL 中的第一个 '?' (nombre)
+            pstmt.setString(2, descrip); // 对应 SQL 中的第二个 '?' (descripcion)
+            pstmt.setInt(3, id);  // 对应 SQL 中的第三个 '?' (WHERE id)
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+	}
 
 }

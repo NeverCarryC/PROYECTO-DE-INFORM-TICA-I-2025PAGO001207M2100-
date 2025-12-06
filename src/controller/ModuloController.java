@@ -1,374 +1,381 @@
 package controller;
 
-
-import java.io.IOException;
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-import db.AsignaturaCRUD;
 import db.ModuloCRUD;
 import db.UnidadCRUD;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
-import javafx.scene.Parent;
-import javafx.scene.control.Accordion;
-import javafx.scene.control.Alert;
+import javafx.scene.control.*;
 import javafx.scene.control.ButtonBar.ButtonData;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TitledPane;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.util.Callback;
 import javafx.util.Pair;
-import model.AppSession;
-import model.Asignatura;
+import javafx.util.StringConverter;
 import model.Modulo;
 import model.Unidad;
-import model.UnidadPrueba;
 
 public class ModuloController {
 
-	private int id_asignatura;
+    private int id_asignatura;
+
+    // ✨ 改用 TreeView，泛型为 Object，因为要同时存 Unidad 和 Modulo
     @FXML
-    private Accordion accordion;
-    
-    private ContextMenu currentContextMenu;// 不然就会出现，右键点击出现多个ContextMenu
- 
-    @FXML
- // CONOCIMIENTO: CICLO DE VIDA DE FXML VIEW
- // No se debe poner en initialize() ninguna operación que dependa
- // de parámetros externos (por ejemplo, id_asignatura).
- //
- // Esto se debe al orden del ciclo de vida de JavaFX.
- //
- // Razón principal: el orden temporal.
- //
- // El flujo es el siguiente:
- //
- // 1. Se ejecuta loader.load()
- //
- // 2. JavaFX crea una nueva instancia del controlador (new ModuloController())
- //
- // 3. JavaFX inyecta los elementos @FXML (por ejemplo, el accordion)
- //
- // 4. JavaFX ejecuta inmediatamente initialize()
- //
-//     🚨 En este momento, todavía NO se ha llamado a setId_asignatura(),
-//     por lo que this.id_asignatura sigue con el valor por defecto: 0.
- //
-//     Si hiciéramos aquí la consulta a la base de datos, se buscarían
-//     los datos con ID = 0 (lógicamente vacíos).
- //
- // 5. loader.load() termina y devuelve la vista
- //
- // 6. Se obtiene el controlador con loader.getController()
- //
- // 7. Finalmente, se llama manualmente a controller.setId_asignatura(id)
- //
-//     ✅ Solo en este momento el ID llega correctamente.
- //
+    private TreeView<Object> courseTreeView;
+
     public void initialize() {
-    }
-    public void cargarUnidadesYAsignatura(int id_asignatura) {
-
-    	// Obtener la lista de unidades y modulos desde la base de datos según el id_asignatura
-    	ArrayList<Unidad> unidades = UnidadCRUD.getUnidadsByIdAsignatura(id_asignatura);
-    	System.out.println(unidades);
-    	// Comprobar si no hay unidades disponibles
-        if (unidades == null || unidades.isEmpty()) {
-            // Crear un VBox como contenedor de un mensaje de "sin contenido"
-            VBox emptyBox = new VBox();
-            emptyBox.setPadding(new Insets(20));
-            // Crear una etiqueta con el mensaje
-            Label emptyLabel = new Label("(No hay contenido disponible)");
-            emptyLabel.setStyle("-fx-text-fill: gray; -fx-font-style: italic;");
-            emptyBox.getChildren().add(emptyLabel);
-            
-            // Crear un TitledPane para mostrar el mensaje en el Accordion
-            // Un accordion tiene muchos titledPan(1:N)
-            TitledPane emptyPane = new TitledPane("Info： No hay contenido disponible", emptyBox);
-            accordion.getPanes().add(emptyPane);
-            return; // Terminar el método si no hay unidades
-        }
-        
-        //  Iterar sobre cada unidad y crear su correspondiente sección en el Accordion
-    	for(Unidad u :unidades) {
-    		 // Crear un VBox contenedor para cada ítem del Accordion
-	        VBox box = new VBox(10);
-	        box.setPadding(new Insets(10));
-	        
-	        // Etiqueta para la descripción de la unidad (con ajuste de texto automático)
-	        Label descripcionLabel = new Label();
-	        descripcionLabel.textProperty().bind(u.descripcionProperty());
-	        descripcionLabel.setWrapText(true);
-	        
-	        // Etiqueta para el título "Temario"
-	        Label temarioLabel = new Label("Temario");
-	        temarioLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
-	        
-	        // ListView para mostrar los módulos de la unidad
-	        // 1. Crear un ListView vacío de tipo Modulo
-	        ListView<Modulo> moduloListView = new ListView<>();
-	        // ListView es un control que muestra una lista vertical desplazable.
-	        // El tipo <Modulo> indica que cada elemento de la lista es un objeto Modulo.
-	        
-	        // 2. Convertir la lista de módulos de la unidad en un ObservableList
-	        ObservableList<Modulo> observableList = FXCollections.observableArrayList(u.getModulos());
-	        // u.getModulos() devuelve un List<Modulo> normal de Java.
-	        // FXCollections.observableArrayList(...) lo convierte en ObservableList, que es "observable":
-	        // cuando se agregan, eliminan o modifican elementos, la UI se actualiza automáticamente.
-	        
-	        // 3. Establecer la lista observable como fuente de datos del ListView
-	        moduloListView.setItems(observableList);
-	        // A partir de este momento, el ListView muestra todos los Modulos del ObservableList.
-	        // Si se modifica observableList (añadir, eliminar, cambiar), ListView se actualiza automáticamente.
-	        // Nota: ListView no almacena los datos por sí mismo, solo los muestra.
-	        
-	        // Agregar la descripción, el título y la lista de módulos al VBox
-	        box.getChildren().addAll(descripcionLabel, temarioLabel, moduloListView);
-	        
-	        // Crear un TitledPane para la unidad y añadirlo al Accordion
-	        TitledPane pane = new TitledPane();
-	        pane.textProperty().bind(u.nombreProperty());
-	        pane.setContent(box);
-	        
-	        // 用户右键点击Unidad, 编辑，删除
-	        pane.addEventHandler(MouseEvent.MOUSE_CLICKED, event ->{
-	        	if(event.getButton() == javafx.scene.input.MouseButton.SECONDARY) {
-	        		if (currentContextMenu != null) {
-	        			currentContextMenu.hide();
-	        		}
-	        		
-	        		//System.out.println("右键点击了单元: " + u.getNombre());
-	        		// System.out.println("ID de Unidad: " + u.getId());
-	        		ContextMenu contextMenu = createContextMenuForUnidad(u);
-	        		contextMenu.show(pane, event.getScreenX(), event.getScreenY());
-	        		// 更新 currentContextMenu 字段为当前显示的菜单
-	        		currentContextMenu = contextMenu;
-	        		
-	        		// event.consume();
-	        	}else {
-					//System.out.println("点到了别的地方");
-
-	        		if (currentContextMenu != null) {
-	        			currentContextMenu.hide();
-	        		}
-				}
-	        });
-	        
-	        
-	        accordion.getPanes().add(pane);
-	        
-    	}
-    }
-    
-   
-    private ContextMenu createContextMenuForUnidad(Unidad unidad) {
-    	ContextMenu contextMenu = new ContextMenu();
-    	
-    	// --- 1. 编辑菜单项 ---
-    	MenuItem editItem = new MenuItem("Editar");
-    	editItem.setOnAction(e -> {
-    		// 🚨 TODO: 替换为实际的编辑逻辑，例如打开编辑对话框
-    		// System.out.println("Clic en Editar para Unidad: " + unidad.getNombre());
-    		 Dialog<Map<String, String>> dialog = new Dialog<>();
-			 dialog.setTitle("Editar");
-			 dialog.setHeaderText("Introduce el nombre y la descripción:");
-			 
-			 ButtonType saveButtonType = new ButtonType("Guardar", ButtonData.OK_DONE);
-			 dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
-			 
-			 GridPane grid = new GridPane();
-			 grid.setHgap(10);
-			 grid.setVgap(10);
-			 grid.setPadding(new Insets(20,15,10,10));
-			 
-			 TextField nameField = new TextField(unidad.getNombre());
-			 nameField.setPromptText("Nombre");
-			 
-			 TextArea descripTextField = new TextArea(unidad.getDescripcion());
-			 descripTextField.setWrapText(true);// 自动换行
-			 descripTextField.setPrefSize(400, 300);
-			 descripTextField.setPromptText("Descripción");
-			 
-			 grid.add(new Label("Nombre:"), 0, 0);
-			 grid.add(nameField, 1, 0);
-			 grid.add(new Label("Descripción:"), 0, 1);
-			 grid.add(descripTextField, 1, 1);
-			    
-			 dialog.getDialogPane().setContent(grid);
-			 
-		      dialog.setResultConverter(dialogButton -> {
-	               if (dialogButton == saveButtonType) {
-	            	   Map<String, String> result = new HashMap<>();
-	                   result.put("nombre", nameField.getText());
-	                   result.put("descripcion", descripTextField.getText());
-	                   return result;
-	               }else {
-					System.out.println("Not into dialogButton == saveButtonType");
-				}
-	               return null;
-	           });
-		      
-		      Optional<Map<String, String>> result = dialog.showAndWait();
-		      if (result.isPresent()) {
-	        	    // El usuario pulsó "Guardar". Obtenemos el Map con los datos.
-	        	    Map<String, String> data = result.get();
-	        	    
-	        	    String nombre = data.get("nombre");
-	        	    String descripcion = data.get("descripcion");
-	        	    
-	        	    System.out.println("Datos Guardados:");
-	        	    System.out.println("Nombre: " + nombre);
-	        	    System.out.println("Descripción: " + descripcion);
-	        	    
-	        	    // Aquí puedes llamar a tu método para guardar en la base de datos o añadir al ListView
-	        	   //  boolean success = AsignaturaCRUD.editAsignatura(selected.getId(), nombre, descripcion);
-	        	    boolean success = ModuloCRUD.updateModulo(unidad.getId(), nombre, descripcion);
-	        	    if(success) {
-	        	    	unidad.setNombre(nombre); 
-	        	    	unidad.setDescripcion(descripcion);
-	        	    	System.out.println("修改成功");
-	            	    // cursoLista.refresh();
-	        	    }else {
-	        	    	System.err.println("Error en Base de datos, el metodo de AsignaturaCRUD.editAsignatura()");
-	        	    }
-	               	    
-	        	} else {
-	        	    // El usuario pulsó "Cancelar" o cerró el diálogo
-	        	    System.out.println("Operación cancelada.");
-	        	}
-		      
-    	});
-    	
-    	// --- 2. 删除菜单项 ---
-    	MenuItem deleteItem = new MenuItem("Eliminar");
-    	deleteItem.setOnAction(e -> {
-    		// 🚨 TODO: 替换为实际的删除逻辑，例如弹出确认对话框并调用 DAO
-    		System.out.println("Clic en Eliminar para Unidad: " + unidad.getNombre());
-    	});
-    	
-    	
-    	//--- 3. 增加菜单项 ---
-    	MenuItem addItem = new MenuItem("Añadir");
-    	addItem.setOnAction(e->{
-    		 Dialog<Pair<String, String>> dialog = new Dialog<>();
-	           dialog.setTitle("Nuevos Unidades");
-	           dialog.setHeaderText("Por favor, introduzca los detalles de Unidades.");
-	           ButtonType loginButtonType = new ButtonType("Guardar", ButtonData.OK_DONE);
-	           dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
-
-	           GridPane grid = new GridPane();
-	           grid.setHgap(10);
-	           grid.setVgap(10);
-	           grid.setPadding(new javafx.geometry.Insets(20, 150, 10, 10));
-
-	           TextField nameField = new TextField();
-	           nameField.setPromptText("Nombre");
-	           TextArea descField = new TextArea();
-	           descField.setPromptText("Descripcion");
-	           descField.setPrefRowCount(3);
-	           descField.setPrefWidth(200);
-
-	           grid.add(new Label("Nombre:"), 0, 0);
-	           grid.add(nameField, 1, 0);
-	           grid.add(new Label("Descripcion:"), 0, 1);
-	           grid.add(descField, 1, 1);
-
-	           dialog.getDialogPane().setContent(grid);
-	           javafx.application.Platform.runLater(nameField::requestFocus);
-
-	           dialog.setResultConverter(dialogButton -> {
-	               if (dialogButton == loginButtonType) {
-	                   return new Pair<>(nameField.getText(), descField.getText());
-	               }
-	               return null;
-	           });
-
-	           Optional<Pair<String, String>> result = dialog.showAndWait();
-	           result.ifPresent(pair -> {
-	               String nombreInput = pair.getKey();
-	               String descInput = pair.getValue();
-	               if (nombreInput == null || nombreInput.trim().isEmpty()) {
-	                   new Alert(Alert.AlertType.WARNING, "¡El nombre no puede estar vacío!").show();
-	                   return;
-	               }
-	               
-	               // 注意：这里需要根据实际情况修改
-	               int currentProfesorId = AppSession.getAlumno().getId(); 
-	               
-	               // 调用后端插入
-	               // Asignatura newAsignatura = AsignaturaCRUD.insertarAsignatura(nombreInput, currentProfesorId, descInput);
-	               Unidad newUnidad = UnidadCRUD.createUnidad(nombreInput, descInput,this.id_asignatura);
-	               if (newUnidad != null) {
-	            	   addUnidadToAccordion(newUnidad);
-
-	               } else {
-	                   new Alert(Alert.AlertType.ERROR, "Error al guardar").show();
-	               }
-	           });
-    	});
-    	
-    	// 将菜单项添加到 ContextMenu
-    	contextMenu.getItems().addAll(editItem, deleteItem,addItem);
-    	
-    	return contextMenu;
+        // 生命周期：等待 setId_asignatura 被调用
     }
 
-
-    
-    private void addUnidadToAccordion(Unidad u) {
-        VBox box = new VBox(10);
-        box.setPadding(new Insets(10));
-
-        Label descripcionLabel = new Label();
-        descripcionLabel.textProperty().bind(u.descripcionProperty());
-        descripcionLabel.setWrapText(true);
-
-        Label temarioLabel = new Label("Temario");
-        temarioLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
-
-        ListView<Modulo> moduloListView = new ListView<>();
-        if(u.getModulos()!=null) {
-        	   ObservableList<Modulo> observableList =
-            FXCollections.observableArrayList(u.getModulos()); moduloListView.setItems(observableList);
-            box.getChildren().addAll(descripcionLabel, temarioLabel, moduloListView);
-            
-        }else {
-        	  box.getChildren().addAll(descripcionLabel, temarioLabel);
-        }
-     
-        TitledPane pane = new TitledPane();
-        pane.textProperty().bind(u.nombreProperty());
-        pane.setContent(box);
-
-        accordion.getPanes().add(pane);
-    }
-
-    
     public void setId_asignatura(int id) {
-    	this.id_asignatura = id;
-    	cargarUnidadesYAsignatura(id);
+        this.id_asignatura = id;
+        loadTreeViewData(id);
+    }
+
+    public int getId_asignatura() {
+        return id_asignatura;
+    }
+
+    // =========================================================
+    //  核心逻辑 1：加载数据并构建树
+    // =========================================================
+    
+    private void loadTreeViewData(int id_asignatura) {
+        // 1. 创建隐形的根节点
+        TreeItem<Object> rootItem = new TreeItem<>("ROOT");
+        rootItem.setExpanded(true);
+
+        // 2. 获取数据
+        ArrayList<Unidad> unidades = UnidadCRUD.getUnidadsByIdAsignatura(id_asignatura);
+
+        if (unidades != null) {
+            for (Unidad u : unidades) {
+                // 创建 父节点 (Unidad)
+                TreeItem<Object> unitItem = new TreeItem<>(u);
+                unitItem.setExpanded(true); // 默认展开
+
+                // 创建 子节点 (Modulo)
+                if (u.getModulos() != null) {
+                    for (Modulo m : u.getModulos()) {
+                        TreeItem<Object> moduleItem = new TreeItem<>(m);
+                        unitItem.getChildren().add(moduleItem);
+                    }
+                }
+                
+                // 将单元加到根节点
+                rootItem.getChildren().add(unitItem);
+            }
+        }
+
+        // 3. 设置给控件
+        courseTreeView.setRoot(rootItem);
+        courseTreeView.setShowRoot(false); // 隐藏 ROOT，只显示 Unidad
+
+        // ✨✨✨ 核心魔法：自定义 CellFactory ✨✨✨
+        setupCustomCellFactory();
+    }
+
+    // =========================================================
+    //  核心逻辑 2：自定义外观 (渲染复杂的 Unidad)
+    // =========================================================
+    
+    private void setupCustomCellFactory() {
+        courseTreeView.setCellFactory(new Callback<TreeView<Object>, TreeCell<Object>>() {
+            @Override
+            public TreeCell<Object> call(TreeView<Object> param) {
+                return new TreeCell<Object>() {
+                    @Override
+                    protected void updateItem(Object item, boolean empty) {
+                        super.updateItem(item, empty);
+
+                        if (empty || item == null) {
+                            setText(null);
+                            setGraphic(null);
+                            setContextMenu(null); // 空行没有任何菜单
+                            
+                            // 这里可以加一个全局右键菜单用来“增加新单元”
+                            setContextMenu(createGlobalContextMenu());
+                        } else {
+                            // --- 情况 A: 渲染 Unidad (三行布局) ---
+                            if (item instanceof Unidad) {
+                                Unidad u = (Unidad) item;
+
+                                // 1. 构建 VBox 布局
+                                VBox vbox = new VBox(3); // 间距 3
+                                vbox.setPadding(new Insets(5));
+
+                                // 第一行：名字 (大号粗体)
+                                Label nameLbl = new Label(u.getNombre());
+                                nameLbl.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+
+                                // 第二行：描述 (灰色斜体)
+                                Label descLbl = new Label(u.getDescripcion());
+                                descLbl.setStyle("-fx-text-fill: gray; -fx-font-style: italic;");
+                                descLbl.setWrapText(true);
+                                descLbl.setMaxWidth(400); // 限制宽度防止无限撑开
+
+                                // 第三行：固定标题 "Temario"
+                                Label titleLbl = new Label("Temario:");
+                                titleLbl.setStyle("-fx-font-weight: bold; -fx-underline: true; -fx-font-size: 11px;");
+
+                                vbox.getChildren().addAll(nameLbl, descLbl, titleLbl);
+
+                                // 2. 显示
+                                setText(null); // 不显示普通文本
+                                setGraphic(vbox); // 显示复杂图形
+                                
+                                // 3. 绑定右键菜单
+                                setContextMenu(createUnidadContextMenu(u, getTreeItem()));
+
+                            // --- 情况 B: 渲染 Modulo (简单文本) ---
+                            } else if (item instanceof Modulo) {
+                                Modulo m = (Modulo) item;
+                                
+                                setText(m.getTitulo());
+                                setGraphic(null);
+                                
+                                // 绑定右键菜单
+                                setContextMenu(createModuloContextMenu(m, getTreeItem()));
+                            }
+                        }
+                    }
+                };
+            }
+        });
+    }
+
+    // =========================================================
+    //  Context Menus (右键菜单)
+    // =========================================================
+
+    // 1. 空白处的菜单 (增加单元)
+    private ContextMenu createGlobalContextMenu() {
+        ContextMenu menu = new ContextMenu();
+        MenuItem addUnit = new MenuItem("Añadir Nueva Unidad");
+        addUnit.setOnAction(e -> handleAddUnidad());
+        menu.getItems().add(addUnit);
+        return menu;
+    }
+
+    // 2. Unidad 的菜单 (增加模块 / 编辑单元 / 删除单元)
+    private ContextMenu createUnidadContextMenu(Unidad unidad, TreeItem<Object> item) {
+        ContextMenu menu = new ContextMenu();
+
+        MenuItem addModule = new MenuItem("Añadir Módulo");
+        addModule.setOnAction(e -> handleAddModulo(unidad)); // 此时不需要传 List，逻辑变了
+
+        MenuItem editUnit = new MenuItem("Editar Unidad");
+        editUnit.setOnAction(e -> handleEditUnidad(unidad, item)); // 传入 Item 方便刷新 UI
+
+        MenuItem delUnit = new MenuItem("Eliminar Unidad");
+        delUnit.setOnAction(e -> handleDeleteUnidad(unidad, item));
+
+        menu.getItems().addAll(addModule, new SeparatorMenuItem(), editUnit, delUnit);
+        return menu;
+    }
+
+    // 3. Modulo 的菜单 (编辑模块 / 删除模块)
+    private ContextMenu createModuloContextMenu(Modulo modulo, TreeItem<Object> item) {
+        ContextMenu menu = new ContextMenu();
+
+        MenuItem editMod = new MenuItem("Editar Módulo");
+        editMod.setOnAction(e -> handleEditModulo(modulo, item));
+
+        MenuItem delMod = new MenuItem("Eliminar Módulo");
+        delMod.setOnAction(e -> handleDeleteModulo(modulo, item));
+        
+        // 双击逻辑其实建议写在 CellFactory 的 setOnMouseClicked 里，这里略过
+        return menu;
+    }
+
+    // =========================================================
+    //  CRUD 逻辑 (直接操作 TreeItem)
+    // =========================================================
+
+    // --- 增加单元 ---
+    private void handleAddUnidad() {
+        Dialog<Pair<String, String>> dialog = createUnidadDialog("Nueva Unidad", "", "");
+        dialog.showAndWait().ifPresent(pair -> {
+            Unidad newUnidad = UnidadCRUD.createUnidad(pair.getKey(), pair.getValue(), this.id_asignatura);
+            if (newUnidad != null) {
+                // ✨ 直接往 Root 加一个新节点
+                TreeItem<Object> newItem = new TreeItem<>(newUnidad);
+                newItem.setExpanded(true);
+                courseTreeView.getRoot().getChildren().add(newItem);
+            }
+        });
+    }
+
+    // --- 删除单元 ---
+    private void handleDeleteUnidad(Unidad unidad, TreeItem<Object> item) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "¿Eliminar unidad " + unidad.getNombre() + "?", ButtonType.YES, ButtonType.NO);
+        alert.showAndWait().ifPresent(r -> {
+            if (r == ButtonType.YES && UnidadCRUD.deleteUnidad(unidad.getId())) {
+                // ✨ 从父节点（Root）移除自己
+                item.getParent().getChildren().remove(item);
+            }
+        });
     }
     
-    public int getId_asignatura() {
-    	return id_asignatura;
+    // --- 编辑单元 ---
+    private void handleEditUnidad(Unidad unidad, TreeItem<Object> item) {
+        Dialog<Pair<String, String>> dialog = createUnidadDialog("Editar", unidad.getNombre(), unidad.getDescripcion());
+        dialog.showAndWait().ifPresent(pair -> {
+            if (UnidadCRUD.updateUnidad(unidad.getId(), pair.getKey(), pair.getValue())) {
+                unidad.setNombre(pair.getKey());
+                unidad.setDescripcion(pair.getValue());
+                
+                // ✨ 触发 UI 刷新 (最简单的办法是发送一个事件，或者重新设值)
+                // TreeView 有时候检测不到内部属性变化，这里我们强制通知
+                TreeItem<Object> parent = item.getParent();
+                int index = parent.getChildren().indexOf(item);
+                parent.getChildren().set(index, item); // 重新 Set 一次触发 updateItem
+            }
+        });
+    }
+
+    // --- 增加模块 (带下拉框 & 自动定位父节点) ---
+    private void handleAddModulo(Unidad currentUnidad) {
+        // 1. 弹出复杂的添加框
+        Dialog<Modulo> dialog = createAddModuloDialog(currentUnidad);
+        
+        dialog.showAndWait().ifPresent(tempMod -> {
+            // 2. 数据库插入
+            Modulo newMod = ModuloCRUD.addModulo(tempMod.getTitulo(), tempMod.getRuta_archivo(), tempMod.getId_unidad());
+            
+            if (newMod != null) {
+                // 3. ✨✨✨ 核心：在 TreeView 里找到正确的“爸爸”并加进去 ✨✨✨
+                // 这里的 newMod.getId_unidad() 可能是当前单元，也可能是用户下拉框选的别的单元
+                
+                TreeItem<Object> targetParentItem = findTreeItemByUnidadId(newMod.getId_unidad());
+                
+                if (targetParentItem != null) {
+                    targetParentItem.getChildren().add(new TreeItem<>(newMod));
+                    targetParentItem.setExpanded(true); // 自动展开方便看到
+                } else {
+                    System.out.println("找不到目标单元的 TreeItem，可能需要刷新页面");
+                }
+            }
+        });
+    }
+
+    // --- 删除模块 ---
+    private void handleDeleteModulo(Modulo modulo, TreeItem<Object> item) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "¿Eliminar módulo?", ButtonType.YES, ButtonType.NO);
+        alert.showAndWait().ifPresent(r -> {
+            if (r == ButtonType.YES && ModuloCRUD.deleteModulo(modulo.getId())) {
+                // ✨ 从父节点（Unidad Item）移除自己
+                item.getParent().getChildren().remove(item);
+            }
+        });
+    }
+
+    // --- 编辑模块 ---
+    private void handleEditModulo(Modulo modulo, TreeItem<Object> item) {
+        TextInputDialog dialog = new TextInputDialog(modulo.getTitulo());
+        dialog.setHeaderText("Editar nombre");
+        dialog.showAndWait().ifPresent(newName -> {
+            if (ModuloCRUD.editModulo(modulo.getId(), newName, modulo.getRuta_archivo(), modulo.getId_unidad())) {
+                modulo.setTitulo(newName);
+                // 刷新 UI
+                TreeItem<Object> parent = item.getParent();
+                int index = parent.getChildren().indexOf(item);
+                parent.getChildren().set(index, item); 
+            }
+        });
+    }
+
+    // =========================================================
+    //  辅助方法
+    // =========================================================
+
+    /**
+     * 遍历 TreeView 寻找特定 Unidad ID 的节点
+     */
+    private TreeItem<Object> findTreeItemByUnidadId(int unidadId) {
+        // 遍历 Root 的所有孩子 (即所有 Unidad Item)
+        for (TreeItem<Object> unitItem : courseTreeView.getRoot().getChildren()) {
+            Object value = unitItem.getValue();
+            if (value instanceof Unidad) {
+                if (((Unidad) value).getId() == unidadId) {
+                    return unitItem;
+                }
+            }
+        }
+        return null;
+    }
+
+    // 创建单元弹窗 (复用)
+    private Dialog<Pair<String, String>> createUnidadDialog(String title, String name, String desc) {
+        Dialog<Pair<String, String>> dialog = new Dialog<>();
+        dialog.setTitle(title);
+        ButtonType saveBtn = new ButtonType("Guardar", ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(saveBtn, ButtonType.CANCEL);
+        
+        GridPane grid = new GridPane();
+        grid.setHgap(10); grid.setVgap(10); grid.setPadding(new Insets(20));
+        
+        TextField nameF = new TextField(name);
+        TextArea descF = new TextArea(desc); descF.setPrefRowCount(3);
+        
+        grid.add(new Label("Nombre:"), 0, 0); grid.add(nameF, 1, 0);
+        grid.add(new Label("Desc:"), 0, 1); grid.add(descF, 1, 1);
+        dialog.getDialogPane().setContent(grid);
+        
+        dialog.setResultConverter(b -> (b == saveBtn) ? new Pair<>(nameF.getText(), descF.getText()) : null);
+        return dialog;
+    }
+
+    // 创建增加模块弹窗 (含下拉框和文件选择)
+    private Dialog<Modulo> createAddModuloDialog(Unidad currentUnidad) {
+        Dialog<Modulo> dialog = new Dialog<>();
+        dialog.setTitle("Nuevo Módulo");
+        ButtonType saveBtn = new ButtonType("Guardar", ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(saveBtn, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10); grid.setVgap(10); grid.setPadding(new Insets(20));
+
+        TextField nameField = new TextField();
+        nameField.setPromptText("Nombre");
+        
+        TextField pathField = new TextField();
+        pathField.setEditable(false);
+        Button fileBtn = new Button("File");
+        fileBtn.setOnAction(e -> {
+            File f = new FileChooser().showOpenDialog(dialog.getDialogPane().getScene().getWindow());
+            if(f!=null) pathField.setText(f.getAbsolutePath());
+        });
+
+        ComboBox<Unidad> unitCombo = new ComboBox<>();
+        unitCombo.getItems().addAll(UnidadCRUD.getUnidadsByIdAsignatura(this.id_asignatura));
+        unitCombo.setConverter(new StringConverter<Unidad>() {
+            public String toString(Unidad u) { return u==null?"":u.getNombre(); }
+            public Unidad fromString(String s) { return null; }
+        });
+        
+        // 默认选中
+        for(Unidad u : unitCombo.getItems()) {
+            if(u.getId() == currentUnidad.getId()) { unitCombo.getSelectionModel().select(u); break; }
+        }
+
+        grid.add(new Label("Nombre:"), 0, 0); grid.add(nameField, 1, 0);
+        grid.add(new Label("Archivo:"), 0, 1); grid.add(pathField, 1, 1); grid.add(fileBtn, 2, 1);
+        grid.add(new Label("Unidad:"), 0, 2); grid.add(unitCombo, 1, 2);
+        
+        dialog.getDialogPane().setContent(grid);
+        
+        dialog.setResultConverter(b -> {
+            if (b == saveBtn && !nameField.getText().isEmpty() && unitCombo.getValue() != null) {
+                return new Modulo(0, nameField.getText(), pathField.getText(), unitCombo.getValue().getId());
+            }
+            return null;
+        });
+        
+        return dialog;
     }
 }

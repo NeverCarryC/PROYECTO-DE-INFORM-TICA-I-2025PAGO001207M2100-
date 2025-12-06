@@ -34,7 +34,7 @@ public class Modulo {
 	public void setRuta_archivo(String ruta_archivo) {
 		this.ruta_archivo = ruta_archivo;
 	}
-	public int getId_categoria() {
+	public int getId_unidad() {
 		return id_categoria;
 	}
 	public void setId_categoria(int id_categoria) {

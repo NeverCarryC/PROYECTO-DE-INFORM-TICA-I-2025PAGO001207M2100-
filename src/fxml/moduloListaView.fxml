@@ -2,10 +2,11 @@
 
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.layout.VBox?>
-
+<?import javafx.scene.control.TreeView?>
 
 <VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ModuloController">
    <children>
-      <Accordion fx:id="accordion" prefWidth="600.0"/>
+   		<TreeView fx:id="courseTreeView" VBox.vgrow="ALWAYS" />
+      
    </children>
 </VBox>

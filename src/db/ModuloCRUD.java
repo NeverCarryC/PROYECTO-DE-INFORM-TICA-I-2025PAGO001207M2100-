@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -13,34 +14,7 @@ import model.Modulo;
 import model.Unidad;
 
 public class ModuloCRUD {
-//	public static Map<Integer, List<Modulo>> getAllModulosByIdCurso(int id_curso){
-//		ArrayList<Modulo> lista = new ArrayList<>();
-//		String sql = "SELECT id, titulo, ruta_archivo, id_categoria, id_curso FROM modelo_gestion.modulo WHERE id_curso=?";
-//		Connection conn = ConexionDB.conectar();
-//		try {
-//			PreparedStatement stmt = conn.prepareStatement(sql);
-//			stmt.setInt(1, id_curso);
-//			ResultSet rs = stmt.executeQuery();
-//			while(rs.next()) {
-//				int id = rs.getInt("id");
-//				String titulo = rs.getString("titulo");
-//				String ruta_archivo = rs.getString("ruta_archivo");
-//				int id_categoria = rs.getInt("id_unidad");
-//				Modulo modulo = new Modulo(id, titulo,ruta_archivo,id_categoria, id_curso);
-//				lista.add(modulo);
-//			}
-//		} catch (SQLException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		
-//		Map<Integer, List<Modulo>> grouped =
-//				lista.stream()
-//			           .collect(Collectors.groupingBy(Modulo::getId_categoria));
-//
-//		
-//		return grouped;
-//	}
+
 	public static ArrayList<Modulo> getModulosByIdUnidad(int id_unidad){
 		ArrayList<Modulo> lista = new ArrayList<>();
 		String sqlString = "SELECT id, titulo, ruta_archivo, id_unidad FROM modelo_gestion.modulo WHERE id_unidad=?;";
@@ -66,17 +40,18 @@ public class ModuloCRUD {
 		return lista;
 	}
 	
-	public static boolean updateModulo(int id_modulo, String nombre, String descrip) {
-		boolean success = false;
-		String sql = "UPDATE modelo_gestion.unidad SET nombre=?, descripcion=? WHERE id=?;";
-		Connection conn =  ConexionDB.conectar();
+	
+	public static boolean editModulo(int id, String titulo, String ruta_archivo, int id_unidad) {
+		String sql = "UPDATE modelo_gestion.modulo SET titulo=?, ruta_archivo=?, id_unidad=? WHERE id=?;";
+		Connection conn = ConexionDB.conectar();
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, nombre);      // 对应 SQL 中的第一个 '?' (nombre)
-            pstmt.setString(2, descrip); // 对应 SQL 中的第二个 '?' (descripcion)
-            pstmt.setInt(3, id_modulo);  // 对应 SQL 中的第三个 '?' (WHERE id)
-            int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
+			pstmt.setString(1, titulo);
+			pstmt.setString(2, ruta_archivo);
+			pstmt.setInt(3, id_unidad);
+			pstmt.setInt(4, id);
+			 int rowsAffected = pstmt.executeUpdate();
+			 return rowsAffected>0;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -84,16 +59,63 @@ public class ModuloCRUD {
 		}
 	}
 	
+	public static boolean deleteModulo(int id) {
+        String sql = "DELETE FROM modelo_gestion.modulo WHERE id = ?";
 
+        try (Connection conn = ConexionDB.conectar();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, id);
+            
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error al eliminar módulo: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+	public static Modulo addModulo(String titulo, String ruta_archivo, int id_unidad) {
+        String sql = "INSERT INTO modelo_gestion.modulo (titulo, ruta_archivo, id_unidad) VALUES (?, ?, ?)";
+
+        // Statement.RETURN_GENERATED_KEYS 是为了获取数据库自动生成的 ID (Auto Increment)
+        try (Connection conn = ConexionDB.conectar();
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            pstmt.setString(1, titulo);
+            pstmt.setString(2, ruta_archivo);
+            pstmt.setInt(3, id_unidad);
+
+            int rowsAffected = pstmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                // 获取生成的 ID
+                try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        int generatedId = rs.getInt(1);
+                        // 返回完整的对象，供 UI 使用
+                        return new Modulo(generatedId, titulo, ruta_archivo, id_unidad);
+                    }
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error al crear módulo: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return null; // 如果失败返回 null
+    }
 	
 	public static void main(String[] args) {
-	
-
-		// System.out.println(ModuloCRUD.getAllModulosByIdCurso(1).get(3));
-		//System.out.println(createCurso("Quimica",1));
-		// System.out.println(getCursoByIdCurso(1));
-		// System.out.println(getCursosByIdProfesor(11));
+		// addModulo("Test modulo", "",1);
+		// deleteModulo(7);
 		
+		
+		// param: int id, String titulo, String ruta_archivo, int id_unidad)
+		// editModulo(9,"edit","",3);
 	}
 
 }
