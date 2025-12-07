@@ -44,16 +44,11 @@ public class loginController {
 
     @FXML
     void login(ActionEvent event) {
-    	System.out.println("login");
     	String usuario = user.getText();
     	String passwordStr = password.getText();
     	String cargo = cargoCombo.getValue();
    	 	Alert alerta;
-
-       
-       
-       
-       
+   	 	
    	 	if (usuario.isEmpty() || passwordStr.isEmpty() || cargo == null) {
 	        alerta = new Alert(Alert.AlertType.WARNING);
 	        alerta.setTitle("Campos incompletos");
@@ -65,17 +60,7 @@ public class loginController {
 	    	Alumno alumno = AlumnoCRUD.login(usuario, passwordStr);
 	    	
 			if(alumno!=null) {
-				// 方法1:用static 变量来存储当前登录用户信息
-				  AppSession.setAlumno(alumno);
-				  
-				  // 方法1： controller 之间传递信息
-				  // 还有一个方法可以获取新页面的控制器
-				  // FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/alumnoMainView.fxml"));
-				  // Parent root = loader.load();
-				// 获取新 Controller
-				// AlumnoMainController controller = loader.getController();
-				// 向新控制器传递数据
-				// controller.initData(alumno, cargo)
+				  	AppSession.setAlumno(alumno);// Guardar las informacion compartido en todas las paginas 
 			        // Cerrar la ventana actual
 			        Stage currentStage = (Stage) loginBtn.getScene().getWindow();
 			        currentStage.close();

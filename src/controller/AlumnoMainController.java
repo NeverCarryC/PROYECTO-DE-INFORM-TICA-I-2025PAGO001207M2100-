@@ -27,6 +27,7 @@ public class AlumnoMainController {
         menus.add("Perfil");
         menus.add("Cursos");
         menus.add("Ajustes");
+      
      
         ObservableList<String> menusData = FXCollections.observableArrayList(menus);
           

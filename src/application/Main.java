@@ -24,9 +24,14 @@ public class Main extends Application {
 //	}
     @Override
     public void start(Stage stage) throws Exception {
-    	// Parent root = FXMLLoader.load(getClass().getResource("/fxml/AlumnoPrincipal.fxml"));
+
+    	// 1. Cargar el archivo FXML que contiene el diseño de la interfaz de usuario.
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
+        
+        // 2. Cargar y procesar el archivo FXML.
+        // Es decir, crea todos los controles de la interfaz y devuelve el nodo raíz (root).
         Parent root = loader.load();
+        // 3. Crear una escena utilizando el nodo raíz y establecer el tamaño de la ventana.
         Scene scene = new Scene(root, 1000,600);
         stage.setTitle("JavaFX alumno camupus");
         stage.setScene(scene);
