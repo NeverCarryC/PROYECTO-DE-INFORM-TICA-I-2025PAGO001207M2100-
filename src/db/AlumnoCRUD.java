@@ -35,8 +35,9 @@ public class AlumnoCRUD {
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		Alumno alumno =  AlumnoCRUD.login("nico", "nico");
-		System.out.print(alumno);
+		// Alumno alumno =  AlumnoCRUD.login("nico", "nico");
+		
+		System.out.print(login("simon2", "simon"));
 	}
 
 }

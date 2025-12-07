@@ -47,10 +47,11 @@ public class loginController {
     	String usuario = user.getText();
     	String passwordStr = password.getText();
     	String cargo = cargoCombo.getValue();
+    	System.out.println(usuario + "+ " + passwordStr + "+" + cargo);
    	 	Alert alerta;
    	 	
    	 	if (usuario.isEmpty() || passwordStr.isEmpty() || cargo == null) {
-	        alerta = new Alert(Alert.AlertType.WARNING);
+	        alerta = new Alert(Alert.AlertType.ERROR);
 	        alerta.setTitle("Campos incompletos");
 	        alerta.setHeaderText("Por favor, completa todos los campos.");
 	        alerta.setContentText("Usuario, contraseña y cargo son obligatorios.");

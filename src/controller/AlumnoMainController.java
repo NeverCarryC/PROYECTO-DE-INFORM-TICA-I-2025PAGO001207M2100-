@@ -27,8 +27,8 @@ public class AlumnoMainController {
         menus.add("Perfil");
         menus.add("Cursos");
         menus.add("Ajustes");
-      
-     
+       // menus.add("Hello I am here");
+      // Lista -> ObservableList -> ListView
         ObservableList<String> menusData = FXCollections.observableArrayList(menus);
           
         navigacionBar.setItems(menusData);
@@ -40,12 +40,14 @@ public class AlumnoMainController {
 			@Override
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
 				// TODO Auto-generated method stub
+				// System.out.println(newValue);
 				if(newValue.equals("Cursos")) {
 					
 				     FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/asignaturaListaView.fxml"));
 			            try {
 							Parent view = loader.load();
-							 rootPane.setCenter(view);
+							rootPane.setCenter(view);
+							// rootPane.setRight(view);
 						} catch (IOException e) {
 						
 							e.printStackTrace();

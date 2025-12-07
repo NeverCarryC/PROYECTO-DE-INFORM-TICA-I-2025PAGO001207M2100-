@@ -11,7 +11,6 @@ import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
 import javafx.util.Pair;
@@ -23,12 +22,11 @@ public class ModuloController {
 
     private int id_asignatura;
 
-    // ✨ 改用 TreeView，泛型为 Object，因为要同时存 Unidad 和 Modulo
     @FXML
     private TreeView<Object> courseTreeView;
 
     public void initialize() {
-        // 生命周期：等待 setId_asignatura 被调用
+        // Esperar a que se llame a setId_asignatura
     }
 
     public void setId_asignatura(int id) {
@@ -41,119 +39,285 @@ public class ModuloController {
     }
 
     // =========================================================
-    //  核心逻辑 1：加载数据并构建树
+    //  Lógica 1: Cargar datos y construir el árbol con Nodos Hijos
     // =========================================================
     
     private void loadTreeViewData(int id_asignatura) {
-        // 1. 创建隐形的根节点
-        TreeItem<Object> rootItem = new TreeItem<>("ROOT");
+        // 1. Crear nodo raíz invisible
+        TreeItem<Object> rootItem = new TreeItem<Object>("ROOT");
         rootItem.setExpanded(true);
 
-        // 2. 获取数据
+        // 2. Obtener datos
         ArrayList<Unidad> unidades = UnidadCRUD.getUnidadsByIdAsignatura(id_asignatura);
-
+        
         if (unidades != null) {
             for (Unidad u : unidades) {
-                // 创建 父节点 (Unidad)
-                TreeItem<Object> unitItem = new TreeItem<>(u);
-                unitItem.setExpanded(true); // 默认展开
+                // Nodo Padre: Unidad
+                TreeItem<Object> unitItem = new TreeItem<Object>(u);
+                unitItem.setExpanded(true); // Expandido por defecto
 
-                // 创建 子节点 (Modulo)
+                // --- Añadir nodos hijos especiales ---
+                
+                // A. Nodo Descripción (Solo si existe descripción)
+                if (u.getDescripcion() != null && !u.getDescripcion().trim().isEmpty()) {
+                    TreeItem<Object> descItem = new TreeItem<Object>(new ItemDescripcion(u.getDescripcion()));
+                    unitItem.getChildren().add(descItem);
+                }
+
+                // B. Nodo Cabecera "Temario"
+                TreeItem<Object> headerItem = new TreeItem<Object>(new ItemCabecera("Temario:"));
+                unitItem.getChildren().add(headerItem);
+
+                // C. Nodos Módulos (Hijos reales)
                 if (u.getModulos() != null) {
                     for (Modulo m : u.getModulos()) {
-                        TreeItem<Object> moduleItem = new TreeItem<>(m);
+                        TreeItem<Object> moduleItem = new TreeItem<Object>(m);
                         unitItem.getChildren().add(moduleItem);
                     }
                 }
                 
-                // 将单元加到根节点
+                // Añadir la unidad a la raíz
                 rootItem.getChildren().add(unitItem);
             }
         }
 
-        // 3. 设置给控件
+        // 3. Configurar el TreeView
         courseTreeView.setRoot(rootItem);
-        courseTreeView.setShowRoot(false); // 隐藏 ROOT，只显示 Unidad
+        courseTreeView.setShowRoot(false); // Ocultar ROOT
 
-        // ✨✨✨ 核心魔法：自定义 CellFactory ✨✨✨
+        // Configurar el renderizado personalizado
         setupCustomCellFactory();
     }
 
     // =========================================================
-    //  核心逻辑 2：自定义外观 (渲染复杂的 Unidad)
+    //  Lógica 2: Renderizado personalizado (CellFactory)
     // =========================================================
     
     private void setupCustomCellFactory() {
-        courseTreeView.setCellFactory(new Callback<TreeView<Object>, TreeCell<Object>>() {
-            @Override
-            public TreeCell<Object> call(TreeView<Object> param) {
-                return new TreeCell<Object>() {
-                    @Override
-                    protected void updateItem(Object item, boolean empty) {
-                        super.updateItem(item, empty);
+        courseTreeView.setCellFactory(tv -> {
+            TreeCell<Object> cell = new TreeCell<Object>() {
+                @Override
+                protected void updateItem(Object item, boolean empty) {
+                    super.updateItem(item, empty);
 
-                        if (empty || item == null) {
-                            setText(null);
-                            setGraphic(null);
-                            setContextMenu(null); // 空行没有任何菜单
+                    if (empty || item == null) {
+                        setText(null);
+                        setGraphic(null);
+                        setContextMenu(null);
+                        // Menú global para añadir unidad en espacio vacío
+                        setContextMenu(createGlobalContextMenu());
+                    } else {
+                        // --- Caso A: Unidad (Solo Nombre) ---
+                        if (item instanceof Unidad) {
+                            Unidad u = (Unidad) item;
                             
-                            // 这里可以加一个全局右键菜单用来“增加新单元”
-                            setContextMenu(createGlobalContextMenu());
-                        } else {
-                            // --- 情况 A: 渲染 Unidad (三行布局) ---
-                            if (item instanceof Unidad) {
-                                Unidad u = (Unidad) item;
-
-                                // 1. 构建 VBox 布局
-                                VBox vbox = new VBox(3); // 间距 3
-                                vbox.setPadding(new Insets(5));
-
-                                // 第一行：名字 (大号粗体)
-                                Label nameLbl = new Label(u.getNombre());
-                                nameLbl.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
-
-                                // 第二行：描述 (灰色斜体)
-                                Label descLbl = new Label(u.getDescripcion());
-                                descLbl.setStyle("-fx-text-fill: gray; -fx-font-style: italic;");
-                                descLbl.setWrapText(true);
-                                descLbl.setMaxWidth(400); // 限制宽度防止无限撑开
-
-                                // 第三行：固定标题 "Temario"
-                                Label titleLbl = new Label("Temario:");
-                                titleLbl.setStyle("-fx-font-weight: bold; -fx-underline: true; -fx-font-size: 11px;");
-
-                                vbox.getChildren().addAll(nameLbl, descLbl, titleLbl);
-
-                                // 2. 显示
-                                setText(null); // 不显示普通文本
-                                setGraphic(vbox); // 显示复杂图形
-                                
-                                // 3. 绑定右键菜单
-                                setContextMenu(createUnidadContextMenu(u, getTreeItem()));
-
-                            // --- 情况 B: 渲染 Modulo (简单文本) ---
-                            } else if (item instanceof Modulo) {
-                                Modulo m = (Modulo) item;
-                                
-                                setText(m.getTitulo());
-                                setGraphic(null);
-                                
-                                // 绑定右键菜单
-                                setContextMenu(createModuloContextMenu(m, getTreeItem()));
-                            }
+                            Label nameLbl = new Label(u.getNombre());
+                            // Estilo: Grande y Negrita
+                            nameLbl.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #2c3e50;");
+                            
+                            setText(null);
+                            setGraphic(nameLbl);
+                            setContextMenu(createUnidadContextMenu(u, getTreeItem()));
+                        } 
+                        // --- Caso B: Descripción (Gris y Cursiva) ---
+                        else if (item instanceof ItemDescripcion) {
+                            ItemDescripcion desc = (ItemDescripcion) item;
+                            
+                            Label descLbl = new Label(desc.getTexto());
+                            descLbl.setStyle("-fx-text-fill: #7f8c8d; -fx-font-style: italic; -fx-font-size: 12px;");
+                            descLbl.setWrapText(true);
+                            descLbl.setMaxWidth(400); 
+                            
+                            setText(null);
+                            setGraphic(descLbl);
+                            setContextMenu(null); // Sin menú para descripción
+                        }
+                        // --- Caso C: Cabecera "Temario" ---
+                        else if (item instanceof ItemCabecera) {
+                            ItemCabecera header = (ItemCabecera) item;
+                            
+                            Label headerLbl = new Label(header.getTitulo());
+                            headerLbl.setStyle("-fx-font-weight: bold; -fx-underline: true; -fx-font-size: 11px; -fx-text-fill: #34495e;");
+                            
+                            setText(null);
+                            setGraphic(headerLbl);
+                            setContextMenu(null); 
+                        }
+                        // --- Caso D: Módulo (Texto normal) ---
+                        else if (item instanceof Modulo) {
+                            Modulo m = (Modulo) item;
+                            //System.out.println("DEBUG: 渲染 Modulo 节点 -> " + ((Modulo)item).getTitulo()); // 👈 加这行
+                         // 打印一下 getTreeItem 看看是不是 null
+//                            TreeItem<Object> currentItem = getTreeItem();
+//                            if (currentItem == null) {
+//                                System.out.println("DEBUG: 警告！getTreeItem() 是 null，菜单无法绑定！");
+//                            }else {
+//                            	System.out.println(currentItem);
+//                            }
+                            setText(m.getTitulo());
+                            setGraphic(null);
+                            ContextMenu menu = createModuloContextMenu(m, getTreeItem());
+                            setContextMenu(menu);
+                            //setContextMenu(createModuloContextMenu(m, getTreeItem()));
                         }
                     }
-                };
-            }
+                }
+                
+                
+            };
+            
+            cell.setOnMouseClicked(event -> {
+            	if (event.getClickCount() == 2 && !cell.isEmpty()) {
+                    Object item = cell.getItem();
+                    
+                    // 3. 只有当点击的是 Modulo 时才触发
+                    if (item instanceof Modulo) {
+                        Modulo m = (Modulo) item;
+                        abrirArchivoLocal(m.getRuta_archivo()); // 调用打开文件的方法
+                    }
+                }
+            });
+            return cell;
         });
     }
 
     // =========================================================
-    //  Context Menus (右键菜单)
+    //  Context Menus (Menús contextuales)
     // =========================================================
 
-    // 1. 空白处的菜单 (增加单元)
-    private ContextMenu createGlobalContextMenu() {
+    private void abrirArchivoLocal(String ruta) {
+    	try {
+            if (ruta == null || ruta.isEmpty()) {
+            	mostrarAlerta("Error", "Este módulo no tiene un archivo asignado.");
+                return;
+            }
+
+            File file = new File(ruta);
+            if (file.exists()) {
+                // 使用 Java AWT Desktop 类打开文件
+                if (java.awt.Desktop.isDesktopSupported()) {
+                    java.awt.Desktop.getDesktop().open(file);
+                } else {
+                    mostrarAlerta("Error", "El sistema no soporta abrir archivos automáticamente.");
+                }
+            } else {
+                mostrarAlerta("Error", "El archivo no existe:\n" + ruta);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarAlerta("Error", "No se pudo abrir el archivo: " + e.getMessage());
+        }
+	}
+
+    /**
+     * 创建模块对话框 (通用)
+     * @param unidadDefault 默认选中的单元
+     * @param moduloEditar 如果是编辑模式，传入旧模块对象；如果是新建，传入 null
+     */
+    private Dialog<Modulo> createModuloFormDialog(String title, Unidad unidadDefault, Modulo moduloEditar) {
+        Dialog<Modulo> dialog = new Dialog<>();
+        dialog.setTitle(title);
+        ButtonType saveBtn = new ButtonType("Guardar", ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(saveBtn, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10); grid.setVgap(10); grid.setPadding(new Insets(20));
+
+        // 1. 名字字段
+        TextField nameField = new TextField();
+        nameField.setPromptText("Nombre del módulo");
+        if (moduloEditar != null) nameField.setText(moduloEditar.getTitulo());
+
+        // 2. 文件字段
+        TextField pathField = new TextField();
+        pathField.setEditable(false); // 只读，只能通过按钮修改
+        if (moduloEditar != null) pathField.setText(moduloEditar.getRuta_archivo());
+
+        Button fileBtn = new Button("Seleccionar Archivo");
+        fileBtn.setOnAction(e -> {
+            File f = new FileChooser().showOpenDialog(dialog.getDialogPane().getScene().getWindow());
+            if(f != null) pathField.setText(f.getAbsolutePath());
+        });
+
+        // 3. 单元下拉框
+        ComboBox<Unidad> unitCombo = new ComboBox<>();
+        unitCombo.getItems().addAll(UnidadCRUD.getUnidadsByIdAsignatura(this.id_asignatura));
+        
+        // 设置下拉框显示的文字
+        unitCombo.setConverter(new StringConverter<Unidad>() {
+            public String toString(Unidad u) { return u == null ? "" : u.getNombre(); }
+            public Unidad fromString(String s) { return null; }
+        });
+
+        // 选中默认单元
+        int targetUnidadId = (moduloEditar != null) ? moduloEditar.getId_unidad() : unidadDefault.getId();
+        for(Unidad u : unitCombo.getItems()) {
+            if(u.getId() == targetUnidadId) { 
+                unitCombo.getSelectionModel().select(u); 
+                break; 
+            }
+        }
+
+        grid.add(new Label("Nombre:"), 0, 0); grid.add(nameField, 1, 0);
+        grid.add(new Label("Archivo:"), 0, 1); grid.add(pathField, 1, 1); grid.add(fileBtn, 2, 1);
+        grid.add(new Label("Unidad:"), 0, 2); grid.add(unitCombo, 1, 2);
+        
+        dialog.getDialogPane().setContent(grid);
+
+        // 转换结果
+        dialog.setResultConverter(b -> {
+            if (b == saveBtn && !nameField.getText().isEmpty() && unitCombo.getValue() != null) {
+                // 返回一个临时的 Modulo 对象，ID 设为 0 或者保留原 ID
+                int id = (moduloEditar != null) ? moduloEditar.getId() : 0;
+                return new Modulo(id, nameField.getText(), pathField.getText(), unitCombo.getValue().getId());
+            }
+            return null;
+        });
+
+        return dialog;
+    }
+    
+    
+    /**
+     * 辅助方法：将源文件复制到项目目录 "archivos_curso"
+     * @param rutaOriginal 用户选择的源文件路径
+     * @return 复制后的新绝对路径 (如果出错返回 null)
+     */
+    private String guardarArchivoEnProyecto(String rutaOriginal) {
+        if (rutaOriginal == null || rutaOriginal.isEmpty()) return null;
+        
+        File sourceFile = new File(rutaOriginal);
+        File destDir = new File("archivos_curso"); 
+        if (!destDir.exists()) destDir.mkdir();
+
+        // 简单起见用原文件名，实际项目建议加 UUID 防止重名
+        File destFile = new File(destDir, sourceFile.getName());
+
+        try {
+            java.nio.file.Files.copy(
+                sourceFile.toPath(), 
+                destFile.toPath(), 
+                java.nio.file.StandardCopyOption.REPLACE_EXISTING
+            );
+            return destFile.getAbsolutePath();
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarAlerta("Error", "Fallo al copiar el archivo: " + e.getMessage());
+            return null;
+        }
+    }
+    
+ // 简单的弹窗辅助方法
+    private void mostrarAlerta(String titulo, String contenido) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(contenido);
+        alert.showAndWait();
+    }
+    
+    
+	private ContextMenu createGlobalContextMenu() {
         ContextMenu menu = new ContextMenu();
         MenuItem addUnit = new MenuItem("Añadir Nueva Unidad");
         addUnit.setOnAction(e -> handleAddUnidad());
@@ -161,24 +325,25 @@ public class ModuloController {
         return menu;
     }
 
-    // 2. Unidad 的菜单 (增加模块 / 编辑单元 / 删除单元)
     private ContextMenu createUnidadContextMenu(Unidad unidad, TreeItem<Object> item) {
         ContextMenu menu = new ContextMenu();
 
         MenuItem addModule = new MenuItem("Añadir Módulo");
-        addModule.setOnAction(e -> handleAddModulo(unidad)); // 此时不需要传 List，逻辑变了
+        addModule.setOnAction(e -> handleAddModulo(unidad)); 
 
         MenuItem editUnit = new MenuItem("Editar Unidad");
-        editUnit.setOnAction(e -> handleEditUnidad(unidad, item)); // 传入 Item 方便刷新 UI
+        editUnit.setOnAction(e -> handleEditUnidad(unidad, item)); 
 
         MenuItem delUnit = new MenuItem("Eliminar Unidad");
         delUnit.setOnAction(e -> handleDeleteUnidad(unidad, item));
+        
+        MenuItem addUnit = new MenuItem("Añadir Nueva Unidad");
+        addUnit.setOnAction(e -> handleAddUnidad());
 
-        menu.getItems().addAll(addModule, new SeparatorMenuItem(), editUnit, delUnit);
+        menu.getItems().addAll(addModule, new SeparatorMenuItem(), editUnit, delUnit,addUnit);
         return menu;
     }
 
-    // 3. Modulo 的菜单 (编辑模块 / 删除模块)
     private ContextMenu createModuloContextMenu(Modulo modulo, TreeItem<Object> item) {
         ContextMenu menu = new ContextMenu();
 
@@ -187,117 +352,269 @@ public class ModuloController {
 
         MenuItem delMod = new MenuItem("Eliminar Módulo");
         delMod.setOnAction(e -> handleDeleteModulo(modulo, item));
-        
-        // 双击逻辑其实建议写在 CellFactory 的 setOnMouseClicked 里，这里略过
+        menu.getItems().addAll(editMod,delMod);
         return menu;
     }
 
     // =========================================================
-    //  CRUD 逻辑 (直接操作 TreeItem)
+    //  Lógica CRUD
     // =========================================================
 
-    // --- 增加单元 ---
+    // --- Añadir Unidad ---
     private void handleAddUnidad() {
         Dialog<Pair<String, String>> dialog = createUnidadDialog("Nueva Unidad", "", "");
         dialog.showAndWait().ifPresent(pair -> {
             Unidad newUnidad = UnidadCRUD.createUnidad(pair.getKey(), pair.getValue(), this.id_asignatura);
             if (newUnidad != null) {
-                // ✨ 直接往 Root 加一个新节点
-                TreeItem<Object> newItem = new TreeItem<>(newUnidad);
+                // Crear nodo Unidad
+                TreeItem<Object> newItem = new TreeItem<Object>(newUnidad);
                 newItem.setExpanded(true);
+                
+                // Añadir hijos visuales (Descripción y Cabecera)
+                if (!newUnidad.getDescripcion().isEmpty()) {
+                    newItem.getChildren().add(new TreeItem<>(new ItemDescripcion(newUnidad.getDescripcion())));
+                }
+                newItem.getChildren().add(new TreeItem<>(new ItemCabecera("Temario:")));
+
                 courseTreeView.getRoot().getChildren().add(newItem);
             }
         });
     }
 
-    // --- 删除单元 ---
+    // --- Eliminar Unidad ---
     private void handleDeleteUnidad(Unidad unidad, TreeItem<Object> item) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "¿Eliminar unidad " + unidad.getNombre() + "?", ButtonType.YES, ButtonType.NO);
         alert.showAndWait().ifPresent(r -> {
             if (r == ButtonType.YES && UnidadCRUD.deleteUnidad(unidad.getId())) {
-                // ✨ 从父节点（Root）移除自己
                 item.getParent().getChildren().remove(item);
             }
         });
     }
     
-    // --- 编辑单元 ---
+    // --- Editar Unidad (Complejo: actualiza nodos hijos) ---
     private void handleEditUnidad(Unidad unidad, TreeItem<Object> item) {
         Dialog<Pair<String, String>> dialog = createUnidadDialog("Editar", unidad.getNombre(), unidad.getDescripcion());
         dialog.showAndWait().ifPresent(pair -> {
             if (UnidadCRUD.updateUnidad(unidad.getId(), pair.getKey(), pair.getValue())) {
-                unidad.setNombre(pair.getKey());
-                unidad.setDescripcion(pair.getValue());
+                String nuevoNombre = pair.getKey();
+                String nuevaDesc = pair.getValue();
+
+                // 1. Actualizar objeto y vista del padre (Nombre)
+                unidad.setNombre(nuevoNombre);
+                unidad.setDescripcion(nuevaDesc);
                 
-                // ✨ 触发 UI 刷新 (最简单的办法是发送一个事件，或者重新设值)
-                // TreeView 有时候检测不到内部属性变化，这里我们强制通知
+                // Forzar refresco del nodo padre (hack para disparar updateItem)
                 TreeItem<Object> parent = item.getParent();
                 int index = parent.getChildren().indexOf(item);
-                parent.getChildren().set(index, item); // 重新 Set 一次触发 updateItem
-            }
-        });
-    }
+                parent.getChildren().set(index, item); 
 
-    // --- 增加模块 (带下拉框 & 自动定位父节点) ---
-    private void handleAddModulo(Unidad currentUnidad) {
-        // 1. 弹出复杂的添加框
-        Dialog<Modulo> dialog = createAddModuloDialog(currentUnidad);
-        
-        dialog.showAndWait().ifPresent(tempMod -> {
-            // 2. 数据库插入
-            Modulo newMod = ModuloCRUD.addModulo(tempMod.getTitulo(), tempMod.getRuta_archivo(), tempMod.getId_unidad());
-            
-            if (newMod != null) {
-                // 3. ✨✨✨ 核心：在 TreeView 里找到正确的“爸爸”并加进去 ✨✨✨
-                // 这里的 newMod.getId_unidad() 可能是当前单元，也可能是用户下拉框选的别的单元
-                
-                TreeItem<Object> targetParentItem = findTreeItemByUnidadId(newMod.getId_unidad());
-                
-                if (targetParentItem != null) {
-                    targetParentItem.getChildren().add(new TreeItem<>(newMod));
-                    targetParentItem.setExpanded(true); // 自动展开方便看到
+                // 2. Actualizar el nodo hijo de "Descripción"
+                TreeItem<Object> descItemNode = null;
+                for (TreeItem<Object> child : item.getChildren()) {
+                    if (child.getValue() instanceof ItemDescripcion) {
+                        descItemNode = child;
+                        break;
+                    }
+                }
+
+                if (descItemNode != null) {
+                    // Si ya existía un nodo descripción...
+                    if (nuevaDesc.trim().isEmpty()) {
+                        // Si la nueva descripción está vacía, eliminamos el nodo
+                        item.getChildren().remove(descItemNode);
+                    } else {
+                        // Si no, actualizamos su texto
+                        descItemNode.setValue(new ItemDescripcion(nuevaDesc));
+                    }
                 } else {
-                    System.out.println("找不到目标单元的 TreeItem，可能需要刷新页面");
+                    // Si NO existía nodo descripción y ahora hay texto...
+                    if (!nuevaDesc.trim().isEmpty()) {
+                        // Lo añadimos al principio (índice 0)
+                        item.getChildren().add(0, new TreeItem<>(new ItemDescripcion(nuevaDesc)));
+                    }
                 }
             }
         });
     }
 
-    // --- 删除模块 ---
+    // --- Añadir Módulo ---
+ // 修改原本的 handleAddModulo 方法
+//    private void handleAddModulo(Unidad currentUnidad) {
+//        // 1. 弹出对话框获取用户输入（包含源文件路径）
+//        Dialog<Modulo> dialog = createAddModuloDialog(currentUnidad);
+//
+//        dialog.showAndWait().ifPresent(tempMod -> {
+//            String rutaOriginal = tempMod.getRuta_archivo();
+//            String rutaFinal = rutaOriginal; // 默认等于原路径
+//
+//            // 2. 如果用户选了文件，执行“上传”（复制）逻辑
+//            if (rutaOriginal != null && !rutaOriginal.isEmpty()) {
+//                File sourceFile = new File(rutaOriginal);
+//                
+//                // 定义你的存储目录，比如项目根目录下的 "archivos_curso"
+//                File destDir = new File("archivos_curso"); 
+//                if (!destDir.exists()) {
+//                    destDir.mkdir(); // 如果目录不存在，创建它
+//                }
+//
+//                // 为了防止文件名冲突，最好加个时间戳或者UUID，这里简单演示用原名
+//                // 比如: archivos_curso/documento.pdf
+//                File destFile = new File(destDir, sourceFile.getName());
+//
+//                try {
+//                    // 【核心代码】复制文件 (StandardCopyOption.REPLACE_EXISTING 表示如果存在则覆盖)
+//                    java.nio.file.Files.copy(
+//                        sourceFile.toPath(), 
+//                        destFile.toPath(), 
+//                        java.nio.file.StandardCopyOption.REPLACE_EXISTING
+//                    );
+//
+//                    // 3. 更新路径为新的相对路径或绝对路径
+//                    // 建议存绝对路径方便打开，或者存相对路径但在打开时拼接
+//                    rutaFinal = destFile.getAbsolutePath(); 
+//
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                    mostrarAlerta("Error al subir archivo", "No se pudo copiar el archivo.");
+//                    return; // 如果复制失败，中断保存
+//                }
+//            }
+//
+//            // 4. 保存到数据库 (注意这里用的是 rutaFinal)
+//            Modulo newMod = ModuloCRUD.addModulo(
+//                tempMod.getTitulo(), 
+//                rutaFinal, 
+//                tempMod.getId_unidad()
+//            );
+//
+//            // 5. 更新 UI
+//            if (newMod != null) {
+//                TreeItem<Object> targetParentItem = findTreeItemByUnidadId(newMod.getId_unidad());
+//                if (targetParentItem != null) {
+//                    targetParentItem.getChildren().add(new TreeItem<>(newMod)); // 记得用 TreeItem<Object>
+//                    targetParentItem.setExpanded(true);
+//                }
+//            }
+//        });
+//    }
+    private void handleAddModulo(Unidad currentUnidad) {
+        // 传入 null 表示是“新建模式”
+        Dialog<Modulo> dialog = createModuloFormDialog("Nuevo Módulo", currentUnidad, null);
+        
+        dialog.showAndWait().ifPresent(tempMod -> {
+            // 1. 处理文件
+            String finalPath = guardarArchivoEnProyecto(tempMod.getRuta_archivo());
+            
+            // 2. 存库
+            // Modulo addModulo(String titulo, String ruta_archivo, int id_unidad)
+            System.out.println(finalPath);
+            Modulo newMod = ModuloCRUD.addModulo(tempMod.getTitulo(), finalPath, tempMod.getId_unidad());
+            
+            // 3. 更新 UI
+            if (newMod != null) {
+                TreeItem<Object> targetParentItem = findTreeItemByUnidadId(newMod.getId_unidad());
+                if (targetParentItem != null) {
+                    // 记得用 Object 泛型
+                    targetParentItem.getChildren().add(new TreeItem<Object>(newMod));
+                    targetParentItem.setExpanded(true);
+                }
+            }
+        });
+    }
+    // --- Eliminar Módulo ---
     private void handleDeleteModulo(Modulo modulo, TreeItem<Object> item) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "¿Eliminar módulo?", ButtonType.YES, ButtonType.NO);
         alert.showAndWait().ifPresent(r -> {
             if (r == ButtonType.YES && ModuloCRUD.deleteModulo(modulo.getId())) {
-                // ✨ 从父节点（Unidad Item）移除自己
                 item.getParent().getChildren().remove(item);
             }
         });
     }
 
-    // --- 编辑模块 ---
+    // --- Editar Módulo ---
+//    private void handleEditModulo(Modulo modulo, TreeItem<Object> item) {
+//        TextInputDialog dialog = new TextInputDialog(modulo.getTitulo());
+//        dialog.setHeaderText("Editar nombre");
+//        dialog.showAndWait().ifPresent(newName -> {
+//            if (ModuloCRUD.editModulo(modulo.getId(), newName, modulo.getRuta_archivo(), modulo.getId_unidad())) {
+//                modulo.setTitulo(newName);
+//                
+//                // Refrescar item
+//                TreeItem<Object> parent = item.getParent();
+//                int index = parent.getChildren().indexOf(item);
+//                parent.getChildren().set(index, item); 
+//            }
+//        });
+//    }
+    
     private void handleEditModulo(Modulo modulo, TreeItem<Object> item) {
-        TextInputDialog dialog = new TextInputDialog(modulo.getTitulo());
-        dialog.setHeaderText("Editar nombre");
-        dialog.showAndWait().ifPresent(newName -> {
-            if (ModuloCRUD.editModulo(modulo.getId(), newName, modulo.getRuta_archivo(), modulo.getId_unidad())) {
-                modulo.setTitulo(newName);
-                // 刷新 UI
-                TreeItem<Object> parent = item.getParent();
-                int index = parent.getChildren().indexOf(item);
-                parent.getChildren().set(index, item); 
+        // 1. 调用上面的通用对话框，传入当前模块作为初始值
+        // 注意：这里 findUnidadById 是个假设的方法，你可以直接从 item.getParent().getValue() 获取当前单元
+        Unidad currentUnidad = (Unidad) item.getParent().getValue(); 
+        Dialog<Modulo> dialog = createModuloFormDialog("Editar Módulo", currentUnidad, modulo);
+
+        dialog.showAndWait().ifPresent(resultMod -> {
+            String finalPath = modulo.getRuta_archivo(); // 默认保持旧路径
+
+            // --- A. 检查文件是否改变 ---
+            // 如果新路径不为空，且和旧路径不一样 -> 说明用户选了新文件
+            if (resultMod.getRuta_archivo() != null && !resultMod.getRuta_archivo().equals(modulo.getRuta_archivo())) {
+                String newStoredPath = guardarArchivoEnProyecto(resultMod.getRuta_archivo());
+                if (newStoredPath != null) {
+                    finalPath = newStoredPath;
+                }
+            }
+
+            // --- B. 更新数据库 ---
+            System.out.println(finalPath);
+            boolean success = ModuloCRUD.editModulo(
+                modulo.getId(), 
+                resultMod.getTitulo(), 
+                finalPath, 
+                resultMod.getId_unidad() // 这里是用户在下拉框选的新ID
+            );
+
+            if (success) {
+                // --- C. 更新内存对象 ---
+                modulo.setTitulo(resultMod.getTitulo());
+                modulo.setRuta_archivo(finalPath);
+                int oldUnidadId = modulo.getId_unidad();
+                int newUnidadId = resultMod.getId_unidad();
+                modulo.setId_unidad(newUnidadId); // 更新 ID
+
+                // --- D. 更新 TreeView UI ---
+                
+                // 情况 1: 单元没变，只是改了字或文件
+                if (oldUnidadId == newUnidadId) {
+                    // 强制刷新当前节点（触发 CellFactory 更新）
+                    // 技巧：先设为 null 再设回来，或者直接用 fireEvent，最简单是重置一下 value
+                    item.setValue(null); 
+                    item.setValue(modulo); 
+                    // 或者更优雅的：courseTreeView.refresh();
+                } 
+                // 情况 2: 用户把模块移动到了另一个单元 (麻烦的情况)
+                else {
+                    // 1. 从旧爸爸那里移除自己
+                    item.getParent().getChildren().remove(item);
+
+                    // 2. 找新爸爸
+                    TreeItem<Object> newParentItem = findTreeItemByUnidadId(newUnidadId);
+                    if (newParentItem != null) {
+                        newParentItem.getChildren().add(item);
+                        newParentItem.setExpanded(true);
+                    }
+                }
+            } else {
+                mostrarAlerta("Error", "No se pudo actualizar el módulo en la base de datos.");
             }
         });
     }
 
     // =========================================================
-    //  辅助方法
+    //  Métodos Auxiliares
     // =========================================================
 
-    /**
-     * 遍历 TreeView 寻找特定 Unidad ID 的节点
-     */
     private TreeItem<Object> findTreeItemByUnidadId(int unidadId) {
-        // 遍历 Root 的所有孩子 (即所有 Unidad Item)
         for (TreeItem<Object> unitItem : courseTreeView.getRoot().getChildren()) {
             Object value = unitItem.getValue();
             if (value instanceof Unidad) {
@@ -309,7 +626,6 @@ public class ModuloController {
         return null;
     }
 
-    // 创建单元弹窗 (复用)
     private Dialog<Pair<String, String>> createUnidadDialog(String title, String name, String desc) {
         Dialog<Pair<String, String>> dialog = new Dialog<>();
         dialog.setTitle(title);
@@ -330,7 +646,6 @@ public class ModuloController {
         return dialog;
     }
 
-    // 创建增加模块弹窗 (含下拉框和文件选择)
     private Dialog<Modulo> createAddModuloDialog(Unidad currentUnidad) {
         Dialog<Modulo> dialog = new Dialog<>();
         dialog.setTitle("Nuevo Módulo");
@@ -358,7 +673,6 @@ public class ModuloController {
             public Unidad fromString(String s) { return null; }
         });
         
-        // 默认选中
         for(Unidad u : unitCombo.getItems()) {
             if(u.getId() == currentUnidad.getId()) { unitCombo.getSelectionModel().select(u); break; }
         }
@@ -379,3 +693,28 @@ public class ModuloController {
         return dialog;
     }
 }
+
+// =========================================================
+//  Clases auxiliares (Helper Classes)
+// =========================================================
+
+/**
+ * Clase auxiliar para representar el nodo de descripción en el TreeView.
+ */
+class ItemDescripcion {
+    private String texto;
+    public ItemDescripcion(String texto) { this.texto = texto; }
+    public String getTexto() { return texto; }
+    @Override public String toString() { return texto; }
+}
+
+/**
+ * Clase auxiliar para representar la cabecera fija "Temario".
+ */
+class ItemCabecera {
+    private String titulo;
+    public ItemCabecera(String titulo) { this.titulo = titulo; }
+    public String getTitulo() { return titulo; }
+}
+
+

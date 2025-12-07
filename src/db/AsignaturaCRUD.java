@@ -225,7 +225,7 @@ public class AsignaturaCRUD {
 	
 	public static void main(String[] args) {
 		
-		// System.out.println(getAllAsignaturas());
+		System.out.println(getAllAsignaturas());
 		 // System.out.println(getCursosPorAnio());
 		// System.out.println(createCurso("Quimica",1));
 		// System.out.println(getCursoByIdCurso(1));
