@@ -23,6 +23,44 @@ public class UnidadCRUD {
 //		
 //	}
 	
+	public static Unidad getUnidadById(int id_unidad) {
+        Unidad unidad = null;
+        // 注意：只查询 Unidad 表
+        String sqlString = "SELECT id, nombre, descripcion, id_asignatura FROM modelo_gestion.unidad WHERE id = ?;";
+        Connection conn = ConexionDB.conectar();
+        
+        try {
+            // 1. 准备和执行查询
+            PreparedStatement stmt = conn.prepareStatement(sqlString);
+            stmt.setInt(1, id_unidad);
+            ResultSet rs = stmt.executeQuery();
+            
+            // 2. 处理结果集
+            if (rs.next()) { // 只期望有一个结果
+                int id = rs.getInt("id");
+                String nombre = rs.getString("nombre");
+                String descripcion = rs.getString("descripcion");
+                int id_asignatura = rs.getInt("id_asignatura");
+                
+                // 3. 获取 Modulos 列表
+                // 使用 ModuloCRUD 类中已有的方法获取子模块
+                ArrayList<Modulo> modulos = ModuloCRUD.getModulosByIdUnidad(id);
+                
+                // 4. 构建最终的 Unidad 对象
+                unidad = new Unidad(id, nombre, descripcion, modulos, id_asignatura);
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("发生 SQL 错误，无法获取 Unidad (ID: " + id_unidad + ")");
+            e.printStackTrace();
+        } finally {
+            // 确保关闭连接，尽管你的代码结构中 `ConexionDB.conectar()` 返回的连接可能需要在外部或使用 try-with-resources 关闭
+            // 这里假设 ConexionDB.conectar() 返回的连接会在其他地方管理关闭。
+        }
+        
+        return unidad;
+    }
+	
 	
 	// obtener la lista de unidad y sus modulos en la asignatura
 	// select DISTINCT u.id , u.nombre, u.descripcion 
@@ -36,7 +74,6 @@ public class UnidadCRUD {
 		try {
 			PreparedStatement stmt = conn.prepareStatement(sqlString);
 			stmt.setInt(1, id_asignatura);
-
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()) {
 				int id_unidad = rs.getInt("u.id");

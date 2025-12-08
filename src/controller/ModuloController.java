@@ -137,6 +137,7 @@ public class ModuloController {
                             ItemCabecera header = (ItemCabecera) item;
                             
                             Label headerLbl = new Label(header.getTitulo());
+                            
                             headerLbl.setStyle("-fx-font-weight: bold; -fx-underline: true; -fx-font-size: 11px; -fx-text-fill: #34495e;");
                             
                             setText(null);
@@ -324,6 +325,14 @@ public class ModuloController {
         menu.getItems().add(addUnit);
         return menu;
     }
+	
+	private ContextMenu createLabelTemarioContextMenu(Unidad unidad) {
+		ContextMenu menu = new ContextMenu();
+		 MenuItem addModule = new MenuItem("Añadir Módulo");
+	        addModule.setOnAction(e -> handleAddModulo(unidad)); 
+	        menu.getItems().addAll(addModule);
+	        return menu;
+	}
 
     private ContextMenu createUnidadContextMenu(Unidad unidad, TreeItem<Object> item) {
         ContextMenu menu = new ContextMenu();

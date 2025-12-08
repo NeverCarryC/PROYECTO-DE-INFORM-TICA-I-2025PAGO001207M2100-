@@ -18,6 +18,43 @@ import model.Asignatura;
 
 public class AsignaturaCRUD {
 	
+	public static Asignatura getAsignaturaById(int id_asignatura){
+	    // 确保查询所有需要的字段
+	    String sql = "SELECT id, nombre, id_profesor, create_date, descripcion FROM curso WHERE id=?";
+	    
+	    // 使用 try-with-resources 确保 Connection 和 PreparedStatement 自动关闭
+	    try (Connection conn = ConexionDB.conectar();
+	         PreparedStatement stmt = conn.prepareStatement(sql)) {
+	        
+	        // 1. 设置参数
+	        stmt.setInt(1, id_asignatura);
+	        
+	        // 2. 执行查询
+	        try (ResultSet rs = stmt.executeQuery()) {
+	            
+	            // 3. 处理结果集
+	            if (rs.next()) {
+	                // 如果找到记录，创建并返回 Asignatura 对象
+	                return new Asignatura(
+	                    rs.getInt("id"),
+	                    rs.getString("nombre"),
+	                    rs.getInt("id_profesor"),
+	                    rs.getDate("create_date"),
+	                    rs.getString("descripcion")
+	                );
+	            }
+	        }
+	        
+	    } catch (SQLException e) {
+	        System.err.println("发生 SQL 错误，无法获取 Asignatura (ID: " + id_asignatura + ")");
+	        e.printStackTrace();
+	    }
+	    
+	    // 如果没有找到记录或发生异常，返回 null
+	    return null;
+	}
+	
+	
 	public static Asignatura insertarAsignatura(String nombre, int id_profesor,  String description ) {
 		String sql = "INSERT INTO curso (nombre, id_profesor, create_date, descripcion) VALUES (?, ?, ?, ?)";
 		Connection conn  = ConexionDB.conectar();

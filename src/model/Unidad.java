@@ -22,14 +22,14 @@ public class Unidad {
         this.id = id;
         this.nombre = new SimpleStringProperty(nombre);
         this.descripcion = new SimpleStringProperty(descripcion);
-        this.id_asignatura = id_asignatura;
+        this.setId_asignatura(id_asignatura);
        
     }
     
     
     public Unidad(int id, String nombre, String descripcion, ArrayList<Modulo> modulos,int id_asignatura) {
         this.id = id;
-        this.id_asignatura = id_asignatura;
+        this.setId_asignatura(id_asignatura);
         this.nombre = new SimpleStringProperty(nombre);
         this.descripcion = new SimpleStringProperty(descripcion);
         this.modulos = FXCollections.observableArrayList(modulos);
@@ -47,4 +47,14 @@ public class Unidad {
     public SimpleStringProperty descripcionProperty() { return descripcion; }
 
     public ObservableList<Modulo> getModulos() { return modulos; }
+
+
+	public int getId_asignatura() {
+		return id_asignatura;
+	}
+
+
+	public void setId_asignatura(int id_asignatura) {
+		this.id_asignatura = id_asignatura;
+	}
 }

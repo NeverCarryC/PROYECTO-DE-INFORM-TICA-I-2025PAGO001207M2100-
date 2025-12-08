@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="yourpackage.ActividadController" spacing="10.0" 
+      alignment="TOP_CENTER" padding="20.0">
+    
+    <HBox alignment="CENTER_LEFT" spacing="10.0">
+        <Label text="Actividad 3: Integración en una Variable">
+            <font>
+                <Font size="20.0" />
+            </font>
+        </Label>
+        <Region HBox.hgrow="ALWAYS" />
+        <Button text="Empezar tarea" 
+                style="-fx-background-color: #e63946; -fx-text-fill: white; -fx-font-weight: bold;" 
+                onAction="#handleStartTask"/>
+    </HBox>
+    
+    <Separator orientation="HORIZONTAL" />
+    
+    <GridPane hgap="15.0" vgap="5.0">
+        <Label text="Fecha de entrega" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-font-weight: bold;"/>
+        <Label text="Puntos" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-font-weight: bold;"/>
+        <Label text="Entregando" GridPane.columnIndex="0" GridPane.rowIndex="2" style="-fx-font-weight: bold;"/>
+        <Label text="Disponible" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-font-weight: bold;"/>
+
+        <Label text="17 de dic a las 23:59" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+        <Label text="10" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+        <Label text="un cuadro de entrada de texto, una URL de página web, una grabación de multimedia, o una carga de archivo" GridPane.columnIndex="1" GridPane.rowIndex="2" wrapText="true" maxWidth="400"/>
+        <Label text="hasta el 17 de dic en 23:59" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+    </GridPane>
+    
+    <Separator orientation="HORIZONTAL" />
+
+    <GridPane style="-fx-border-color: lightgrey; -fx-border-width: 1;">
+        <columnConstraints>
+            <ColumnConstraints hgrow="NEVER" prefWidth="150" />
+            <ColumnConstraints hgrow="ALWAYS" />
+        </columnConstraints>
+        
+        <HBox GridPane.columnIndex="0" GridPane.rowIndex="0" alignment="CENTER" style="-fx-background-color: #e0e0e0; -fx-padding: 8;">
+            <Label text="Unidad" style="-fx-font-weight: bold;" />
+        </HBox>
+        <HBox GridPane.columnIndex="1" GridPane.rowIndex="0" alignment="CENTER_LEFT" style="-fx-background-color: #e0e0e0; -fx-padding: 8; -fx-border-color: lightgrey; -fx-border-width: 0 0 0 1;">
+            <Label text="Unidad 3" />
+        </HBox>
+
+        <HBox GridPane.columnIndex="0" GridPane.rowIndex="1" alignment="CENTER" style="-fx-background-color: #e0e0e0; -fx-padding: 8; -fx-border-color: lightgrey; -fx-border-width: 1 1 0 0;">
+            <Label text="Entrega" style="-fx-font-weight: bold;" />
+        </HBox>
+        <HBox GridPane.columnIndex="1" GridPane.rowIndex="1" alignment="CENTER_LEFT" style="-fx-padding: 8; -fx-border-color: lightgrey; -fx-border-width: 1 0 0 1;">
+            <Label text="A través del Campus Virtual" />
+        </HBox>
+
+        <HBox GridPane.columnIndex="0" GridPane.rowIndex="2" alignment="CENTER" style="-fx-background-color: #e0e0e0; -fx-padding: 8; -fx-border-color: lightgrey; -fx-border-width: 1 1 1 0;">
+            <Label text="Enunciado" style="-fx-font-weight: bold;" />
+        </HBox>
+        <HBox GridPane.columnIndex="1" GridPane.rowIndex="2" alignment="CENTER_LEFT" style="-fx-padding: 8; -fx-border-color: lightgrey; -fx-border-width: 1 0 1 1;">
+            <Label text="Descarga el enunciado y las instrucciones" />
+        </HBox>
+    </GridPane>
+
+</VBox>

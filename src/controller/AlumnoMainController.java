@@ -24,10 +24,10 @@ public class AlumnoMainController {
     public void initialize() {
  
         ArrayList<String> menus = new ArrayList<>();
+        menus.add("Asignaturas");
+        menus.add("Tareas");
         menus.add("Perfil");
-        menus.add("Cursos");
         menus.add("Ajustes");
-       // menus.add("Hello I am here");
       // Lista -> ObservableList -> ListView
         ObservableList<String> menusData = FXCollections.observableArrayList(menus);
           
@@ -41,7 +41,7 @@ public class AlumnoMainController {
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
 				// TODO Auto-generated method stub
 				// System.out.println(newValue);
-				if(newValue.equals("Cursos")) {
+				if(newValue.equals("Asignaturas")) {
 					
 				     FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/asignaturaListaView.fxml"));
 			            try {
@@ -73,6 +73,15 @@ public class AlumnoMainController {
 						e.printStackTrace();
 					}
 					
+				}else if(newValue.equals("Tareas")) {
+					FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/tareaListaView.fxml"));
+					try {
+						Parent view =loader.load();
+						rootPane.setCenter(view);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 		});
