@@ -3,6 +3,7 @@ package db;
 import java.sql.*;
 import java.util.ArrayList;
 
+import model.Alumno;
 import model.AppSession;
 import model.RegistroExamen;
 
@@ -76,7 +77,9 @@ public class RegistroCRUD {
             while (rs.next()) {
                 RegistroExamen reg = mapResultSetToRegistro(rs);
                 // 老师端需要看名字
-                String nombre = AppSession.getAlumno().getNombre();
+               //  String nombre = AppSession.getAlumno().getNombre();
+                Alumno alumno = AlumnoCRUD.getAlumnoById(reg.getId_alumno());
+                String nombre = alumno.getNombre();
                 reg.setNombreAlumno(nombre); // 记得这里换成你真实的查名字函数
                 lista.add(reg);
             }
