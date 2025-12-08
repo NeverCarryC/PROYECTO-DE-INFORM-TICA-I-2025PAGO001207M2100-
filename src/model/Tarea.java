@@ -2,6 +2,9 @@ package model;
 
 import java.sql.Date;
 
+import db.AsignaturaCRUD;
+import db.UnidadCRUD;
+
 public class Tarea {
 private int id;
 private String titulo;
@@ -80,8 +83,9 @@ public void setid_unidad(int id_unidad) {
 }
 @Override
 public String toString() {
-	return "Tarea [id=" + id + ", titulo=" + titulo + ", contenido=" + contenido + ", num_intento=" + num_intento
-			+ ", fechaEntrega=" + fechaEntrega + ", id_unidad=" + id_unidad + ", ruta=" + ruta + "]";
+	 Unidad unidad = UnidadCRUD.getUnidadById(getId_unidad());
+	 Asignatura asignatura = AsignaturaCRUD.getAsignaturaById(unidad.getId_asignatura());
+	return getTitulo() + "\n " + asignatura.getNombre();
 }
 public Tarea(int id, String titulo, String contenido, int id_unidad) {
 	super();

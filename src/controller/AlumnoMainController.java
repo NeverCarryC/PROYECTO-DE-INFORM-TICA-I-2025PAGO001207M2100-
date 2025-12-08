@@ -28,6 +28,7 @@ public class AlumnoMainController {
         menus.add("Tareas");
         menus.add("Perfil");
         menus.add("Ajustes");
+        menus.add("Calificación");
       // Lista -> ObservableList -> ListView
         ObservableList<String> menusData = FXCollections.observableArrayList(menus);
           
@@ -82,6 +83,8 @@ public class AlumnoMainController {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+				}else if(newValue.equals("calificación")) {
+					
 				}
 			}
 		});

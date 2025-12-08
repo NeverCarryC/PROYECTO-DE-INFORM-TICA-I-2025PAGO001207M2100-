@@ -1,18 +1,21 @@
 package model;
 
-import java.sql.Date; // 如果你在模型中处理日期时间，可能需要导入
-
 public class RegistroExamen {
 
+    // --- 数据库对应字段 ---
     private int id;
     private int id_examen;
     private int id_alumno;
     private int id_profesor;
-    private Double nota; // 成绩可能是 null，使用 Double
-    private String comentario; // 备注可能是 null
-    private String ruta_archivo; // 文件路径可能是 null
+    private Double nota;         // 使用 Double 类型，允许为 null (表示未评分)
+    private String comentario;   // 评语
+    private String ruta_archivo; // 文件路径
 
-    // 完整的构造函数 (假设所有字段都可能从 DB 中获取)
+    // --- 【关键新增】UI 显示专用字段 (数据库无此列) ---
+    // 这个字段用于在老师评分界面的表格中直接显示学生名字
+    private String nombreAlumno; 
+
+    // --- 构造函数 ---
     public RegistroExamen(int id, int id_examen, int id_alumno, int id_profesor, Double nota, String comentario, String ruta_archivo) {
         this.id = id;
         this.id_examen = id_examen;
@@ -21,11 +24,6 @@ public class RegistroExamen {
         this.nota = nota;
         this.comentario = comentario;
         this.ruta_archivo = ruta_archivo;
-    }
-
-    // 插入时使用的构造函数 (ID 通常由数据库自动生成)
-    public RegistroExamen(int id_examen, int id_alumno, int id_profesor, Double nota, String comentario, String ruta_archivo) {
-        this(0, id_examen, id_alumno, id_profesor, nota, comentario, ruta_archivo);
     }
 
     // --- Getters and Setters ---
@@ -51,8 +49,12 @@ public class RegistroExamen {
     public String getRuta_archivo() { return ruta_archivo; }
     public void setRuta_archivo(String ruta_archivo) { this.ruta_archivo = ruta_archivo; }
 
+    // --- 【新增字段的 Getter/Setter】 ---
+    public String getNombreAlumno() { return nombreAlumno; }
+    public void setNombreAlumno(String nombreAlumno) { this.nombreAlumno = nombreAlumno; }
+
     @Override
     public String toString() {
-        return "RegistroExamen [id=" + id + ", examen=" + id_examen + ", alumno=" + id_alumno + ", nota=" + nota + "]";
+        return "RegistroExamen [id=" + id + ", nota=" + nota + ", comentario=" + comentario + "]";
     }
 }
