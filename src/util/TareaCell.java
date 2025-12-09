@@ -14,6 +14,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import model.AppSession;
 import model.Tarea;
 
 public class TareaCell extends ListCell<Tarea> {
@@ -31,7 +32,11 @@ public class TareaCell extends ListCell<Tarea> {
         super();
 
         // --- 1. 布局设置 ---
-        hbox.getChildren().addAll(label, spacer, btnOpen, btnEdit, btnDelete, btnGrade);
+        if(!AppSession.isAlumno()) {        	
+        	hbox.getChildren().addAll(label, spacer, btnOpen, btnEdit, btnDelete, btnGrade);
+        }else {
+        	hbox.getChildren().addAll(label, spacer, btnOpen);
+        }
         hbox.setAlignment(Pos.CENTER_LEFT);
         hbox.setSpacing(5);
         HBox.setHgrow(spacer, Priority.ALWAYS); // 把按钮顶到右边

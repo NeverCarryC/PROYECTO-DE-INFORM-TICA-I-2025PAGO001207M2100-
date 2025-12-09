@@ -8,6 +8,7 @@ public class Alumno {
 		this.apellido = apellido;
 		this.email = email;
 		this.password = password;
+		
 	}
 	private int id;
 	private String nombre;

@@ -13,7 +13,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.BorderPane;
 
-public class AlumnoMainController {
+public class MainController {
 
     @FXML
     private BorderPane rootPane;

@@ -29,7 +29,6 @@ public class TareaListaController {
     	ArrayList<Tarea> tareaArrayList = TareasCRUD.getTareaByIdUnidad(1);
         // Convertir a ObservableList y vincular al ListView
         ObservableList<Tarea> observableList = FXCollections.observableArrayList(tareaArrayList);
-       System.out.println(observableList);
        //tareaListView = new ListView<Tarea>();
        tareaListView.setItems(observableList);
 

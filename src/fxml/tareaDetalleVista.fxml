@@ -46,7 +46,7 @@
             <Insets bottom="15.0" top="-17.0" />
          </VBox.margin>
       </Separator>
-      <HBox alignment="CENTER" prefHeight="204.0" prefWidth="600.0">
+      <HBox alignment="CENTER" prefHeight="131.0" prefWidth="504.0">
          <children>
             <GridPane alignment="CENTER" gridLinesVisible="true" prefHeight="176.0" prefWidth="502.0">
               <columnConstraints>
@@ -70,6 +70,16 @@
                   <Label fx:id="nombreAsignatura" text="Label" GridPane.columnIndex="1" />
                </children>
             </GridPane>
+         </children>
+      </HBox>
+      <Separator prefWidth="200.0">
+         <VBox.margin>
+            <Insets top="15.0" />
+         </VBox.margin>
+      </Separator>
+      <HBox fx:id="resultadoBox" alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+         <children>
+            <Label fx:id="resultado" text="Resultado: " />
          </children>
       </HBox>
    </children>

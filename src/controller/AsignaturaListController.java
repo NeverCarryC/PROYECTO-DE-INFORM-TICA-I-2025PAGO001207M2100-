@@ -57,7 +57,11 @@ public class AsignaturaListController {
         menuAdd.getItems().add(addItem);
 
         // Establecer este menú como predeterminado para la lista
-        cursoLista.setContextMenu(menuAdd);
+        // System.out.println(AppSession.isAlumno());
+        if(!AppSession.isAlumno()) {
+        	 cursoLista.setContextMenu(menuAdd);
+        }
+       
 
         // --- Menú B: Editar/Eliminar (para clic en un elemento existente) ---
         menuEditDelete = new ContextMenu();
@@ -66,8 +70,10 @@ public class AsignaturaListController {
 
         deleteItem.setOnAction(e -> eliminarAsignaturaSeleccionada());
         editItem.setOnAction(e -> mostrarDialogoEditarSeleccionada());
-
-        menuEditDelete.getItems().addAll(deleteItem, editItem);
+        if(!AppSession.isAlumno()) {
+        	menuEditDelete.getItems().addAll(deleteItem, editItem);
+        }
+        
     }
 
     // =================================================================

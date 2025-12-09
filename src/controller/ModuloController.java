@@ -15,6 +15,7 @@ import javafx.stage.FileChooser;
 import javafx.util.Callback;
 import javafx.util.Pair;
 import javafx.util.StringConverter;
+import model.AppSession;
 import model.Modulo;
 import model.Unidad;
 
@@ -103,9 +104,9 @@ public class ModuloController {
                     if (empty || item == null) {
                         setText(null);
                         setGraphic(null);
-                        setContextMenu(null);
+                        // setContextMenu(null);
                         // Menú global para añadir unidad en espacio vacío
-                        setContextMenu(createGlobalContextMenu());
+                        if(!AppSession.isAlumno()) setContextMenu(createGlobalContextMenu());
                     } else {
                         // --- Caso A: Unidad (Solo Nombre) ---
                         if (item instanceof Unidad) {
@@ -117,7 +118,7 @@ public class ModuloController {
                             
                             setText(null);
                             setGraphic(nameLbl);
-                            setContextMenu(createUnidadContextMenu(u, getTreeItem()));
+                            if(!AppSession.isAlumno()) setContextMenu(createUnidadContextMenu(u, getTreeItem()));
                         } 
                         // --- Caso B: Descripción (Gris y Cursiva) ---
                         else if (item instanceof ItemDescripcion) {
@@ -130,7 +131,7 @@ public class ModuloController {
                             
                             setText(null);
                             setGraphic(descLbl);
-                            setContextMenu(null); // Sin menú para descripción
+                            if(!AppSession.isAlumno()) setContextMenu(null); // Sin menú para descripción
                         }
                         // --- Caso C: Cabecera "Temario" ---
                         else if (item instanceof ItemCabecera) {
@@ -142,7 +143,7 @@ public class ModuloController {
                             
                             setText(null);
                             setGraphic(headerLbl);
-                            setContextMenu(null); 
+                            if(!AppSession.isAlumno()) setContextMenu(null); 
                         }
                         // --- Caso D: Módulo (Texto normal) ---
                         else if (item instanceof Modulo) {
@@ -157,9 +158,11 @@ public class ModuloController {
 //                            }
                             setText(m.getTitulo());
                             setGraphic(null);
-                            ContextMenu menu = createModuloContextMenu(m, getTreeItem());
-                            setContextMenu(menu);
-                            //setContextMenu(createModuloContextMenu(m, getTreeItem()));
+                            if(!AppSession.isAlumno()) {
+                                ContextMenu menu = createModuloContextMenu(m, getTreeItem());
+                                setContextMenu(menu);
+                            }
+                       
                         }
                     }
                 }
@@ -446,66 +449,7 @@ public class ModuloController {
         });
     }
 
-    // --- Añadir Módulo ---
- // 修改原本的 handleAddModulo 方法
-//    private void handleAddModulo(Unidad currentUnidad) {
-//        // 1. 弹出对话框获取用户输入（包含源文件路径）
-//        Dialog<Modulo> dialog = createAddModuloDialog(currentUnidad);
-//
-//        dialog.showAndWait().ifPresent(tempMod -> {
-//            String rutaOriginal = tempMod.getRuta_archivo();
-//            String rutaFinal = rutaOriginal; // 默认等于原路径
-//
-//            // 2. 如果用户选了文件，执行“上传”（复制）逻辑
-//            if (rutaOriginal != null && !rutaOriginal.isEmpty()) {
-//                File sourceFile = new File(rutaOriginal);
-//                
-//                // 定义你的存储目录，比如项目根目录下的 "archivos_curso"
-//                File destDir = new File("archivos_curso"); 
-//                if (!destDir.exists()) {
-//                    destDir.mkdir(); // 如果目录不存在，创建它
-//                }
-//
-//                // 为了防止文件名冲突，最好加个时间戳或者UUID，这里简单演示用原名
-//                // 比如: archivos_curso/documento.pdf
-//                File destFile = new File(destDir, sourceFile.getName());
-//
-//                try {
-//                    // 【核心代码】复制文件 (StandardCopyOption.REPLACE_EXISTING 表示如果存在则覆盖)
-//                    java.nio.file.Files.copy(
-//                        sourceFile.toPath(), 
-//                        destFile.toPath(), 
-//                        java.nio.file.StandardCopyOption.REPLACE_EXISTING
-//                    );
-//
-//                    // 3. 更新路径为新的相对路径或绝对路径
-//                    // 建议存绝对路径方便打开，或者存相对路径但在打开时拼接
-//                    rutaFinal = destFile.getAbsolutePath(); 
-//
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                    mostrarAlerta("Error al subir archivo", "No se pudo copiar el archivo.");
-//                    return; // 如果复制失败，中断保存
-//                }
-//            }
-//
-//            // 4. 保存到数据库 (注意这里用的是 rutaFinal)
-//            Modulo newMod = ModuloCRUD.addModulo(
-//                tempMod.getTitulo(), 
-//                rutaFinal, 
-//                tempMod.getId_unidad()
-//            );
-//
-//            // 5. 更新 UI
-//            if (newMod != null) {
-//                TreeItem<Object> targetParentItem = findTreeItemByUnidadId(newMod.getId_unidad());
-//                if (targetParentItem != null) {
-//                    targetParentItem.getChildren().add(new TreeItem<>(newMod)); // 记得用 TreeItem<Object>
-//                    targetParentItem.setExpanded(true);
-//                }
-//            }
-//        });
-//    }
+   
     private void handleAddModulo(Unidad currentUnidad) {
         // 传入 null 表示是“新建模式”
         Dialog<Modulo> dialog = createModuloFormDialog("Nuevo Módulo", currentUnidad, null);
@@ -540,21 +484,6 @@ public class ModuloController {
         });
     }
 
-    // --- Editar Módulo ---
-//    private void handleEditModulo(Modulo modulo, TreeItem<Object> item) {
-//        TextInputDialog dialog = new TextInputDialog(modulo.getTitulo());
-//        dialog.setHeaderText("Editar nombre");
-//        dialog.showAndWait().ifPresent(newName -> {
-//            if (ModuloCRUD.editModulo(modulo.getId(), newName, modulo.getRuta_archivo(), modulo.getId_unidad())) {
-//                modulo.setTitulo(newName);
-//                
-//                // Refrescar item
-//                TreeItem<Object> parent = item.getParent();
-//                int index = parent.getChildren().indexOf(item);
-//                parent.getChildren().set(index, item); 
-//            }
-//        });
-//    }
     
     private void handleEditModulo(Modulo modulo, TreeItem<Object> item) {
         // 1. 调用上面的通用对话框，传入当前模块作为初始值

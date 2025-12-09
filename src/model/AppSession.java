@@ -8,15 +8,12 @@ import db.AsignaturaCRUD;
 public class AppSession {
 
     private static Alumno alumnoLogeado;
+  
+    private static Profesor profesorLogeado;
     private static ArrayList<Asignatura> cursos;
-    //  ArrayList<Curso> cursos = CursoCRUD.getCursos();
-
+    private static boolean isAlumno; 
     
 
-    
-    public static void setAlumno(Alumno alumno) {
-        alumnoLogeado = alumno;
-    }
 
     public static ArrayList<Asignatura> getCursos() {
 		return cursos;
@@ -25,8 +22,37 @@ public class AppSession {
 	public static void setCursos(ArrayList<Asignatura> cursos) {
 		AppSession.cursos = cursos;
 	}
-
+	
+	
+	
+    public static void setAlumno(Alumno alumno) {
+    	
+        alumnoLogeado = alumno;
+        setIsAlumno(true);
+    }
 	public static Alumno getAlumno() {
         return alumnoLogeado;
     }
+
+	public static Profesor getProfesor() {
+		return profesorLogeado;
+	
+	}
+
+	public static void setProfesor(Profesor profesorLogeado) {
+		setIsAlumno(false);
+		AppSession.profesorLogeado = profesorLogeado;
+	}
+
+	public static boolean isAlumno() {
+		return isAlumno;
+	}
+
+	public static void setIsAlumno(boolean isAlumno) {
+		AppSession.isAlumno = isAlumno;
+	}
+
+
+
+
 }

@@ -48,7 +48,9 @@ public class TareaDetalleController {
     @FXML private Label name;
     @FXML private Label nombre_unidada;
     @FXML private Label num_intento;
-
+    @FXML private HBox resultadoBox;
+    @FXML
+    private Label resultado;
     @FXML
     void empezar(ActionEvent event) {
         Dialog<Map<String, String>> dialog = createFileUploadDialog("Subir Archivo y Comentario");
@@ -81,10 +83,15 @@ public class TareaDetalleController {
                 successAlert.setContentText("El archivo y el comentario han sido subidos correctamente.");
                 successAlert.showAndWait();
                 
-                // 更新 UI：变成已提交状态
+                // 更新 UI：Button Empezar 变成已提交状态
                 this.empezar.setText("Entregado!");
                 this.empezar.setDisable(true);
                 createAndSetupDownloadButton(registroInsertado.getRuta_archivo());
+                // 更新UI： label Resultado
+                ArrayList<RegistroExamen> intentos = RegistroCRUD.getRegistrosByAlumnoAndExamen(AppSession.getAlumno().getId(),  this.tarea.getId());
+               
+                
+                loadEstado(intentos.size(), intentos);
                 
             } else {
                 Alert errorAlert = new Alert(Alert.AlertType.ERROR);
@@ -167,6 +174,7 @@ public class TareaDetalleController {
         // 使用 unified CRUD 查询是否已经提交过
         ArrayList<RegistroExamen> intentos = RegistroCRUD.getRegistrosByAlumnoAndExamen(AppSession.getAlumno().getId(),  this.tarea.getId());
         
+       
         int numeroIntentos = intentos.size();
         if(numeroIntentos > 0) {
             RegistroExamen primeraEntrega = intentos.get(0);
@@ -175,6 +183,14 @@ public class TareaDetalleController {
             createAndSetupDownloadButton(primeraEntrega.getRuta_archivo());
         }
         
+        // 读取考试的成绩
+        // 1. 没提交
+        // 2. 提交了没批改
+        // 3. 批改了
+  
+        loadEstado(numeroIntentos, intentos);
+
+        
         this.name.setText(tarea.getTitulo());
         this.fechaEntrega.setText("Fecha de entrega: " + tarea.getFechaEntrega().toString());
         this.nombre_unidada.setText(this.unidad.getNombre());
@@ -182,13 +198,30 @@ public class TareaDetalleController {
         this.num_intento.setText("Intentos: " + tarea.getNum_intento());
         this.nombreAsignatura.setText(asignatura.getNombre());
         
+        
         if (tarea.getRuta() != null) {
              File file= new File(tarea.getRuta());
              enunciado.setText(file.getName());
         }
     }
     
-    private void createAndSetupDownloadButton(String ruta_archivo) {
+    
+    
+    private void loadEstado(int numeroIntentos, ArrayList<RegistroExamen> intentos) {
+		// TODO Auto-generated method stub
+    	String resultadoString ="";
+    	  if(numeroIntentos == 0) {
+          	resultadoString = "Resultado: No entregado";
+          }
+          else if(intentos.get(0).getNota() == null ) {
+        	resultadoString = "Resultado: Entregado";
+          }else if(intentos.get(0).getNota()!= null) {
+          	resultadoString = "Resultado: Calificado" + "\n Punto: " + intentos.get(0).getNota() ;
+          }
+    	  resultado.setText( resultadoString);
+	}
+
+	private void createAndSetupDownloadButton(String ruta_archivo) {
         if (descargar == null) {
             descargar = new Button("Descargar Mi Entrega");
             mainContentHBox.getChildren().add(descargar);

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="controller.CalificacionController">
+    <top>
+        <Label fx:id="lblTitulo" text="Calificación de Tarea" style="-fx-font-size: 18px; -fx-padding: 10;" BorderPane.alignment="CENTER"/>
+    </top>
+    <center>
+        <TableView fx:id="tabla" editable="true">
+            <columns>
+                <TableColumn fx:id="colAlumno" text="Alumno" prefWidth="150"/>
+                <TableColumn fx:id="colNota" text="Nota (Edit)" prefWidth="100"/>
+                <TableColumn fx:id="colComentario" text="Comentario (Edit)" prefWidth="250"/>
+                <TableColumn fx:id="colArchivo" text="Archivo" prefWidth="100"/>
+            </columns>
+        </TableView>
+    </center>
+</BorderPane>

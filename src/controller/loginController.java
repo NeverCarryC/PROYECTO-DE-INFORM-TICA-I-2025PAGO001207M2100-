@@ -3,6 +3,7 @@ package controller;
 import java.io.IOException;
 
 import db.AlumnoCRUD;
+import db.ProfesorCRUD;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -18,6 +19,7 @@ import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import model.Alumno;
 import model.AppSession;
+import model.Profesor;
 
 public class loginController {
 
@@ -47,49 +49,69 @@ public class loginController {
     	String usuario = user.getText();
     	String passwordStr = password.getText();
     	String cargo = cargoCombo.getValue();
-    	System.out.println(usuario + "+ " + passwordStr + "+" + cargo);
-   	 	Alert alerta;
+    	
+ 
    	 	
    	 	if (usuario.isEmpty() || passwordStr.isEmpty() || cargo == null) {
-	        alerta = new Alert(Alert.AlertType.ERROR);
-	        alerta.setTitle("Campos incompletos");
-	        alerta.setHeaderText("Por favor, completa todos los campos.");
-	        alerta.setContentText("Usuario, contraseña y cargo son obligatorios.");
-	        alerta.showAndWait();
+   	 		showErrorAlerta("Campos incompletos", "Por favor, completa todos los campos.","Usuario, contraseña y cargo son obligatorios." );
 	        return;
 	    }else {
-	    	Alumno alumno = AlumnoCRUD.login(usuario, passwordStr);
+	    	// Login by alumno
+
+	    	if(cargo.equals("ALUMNO")) {
+	    		Alumno alumno = AlumnoCRUD.login(usuario, passwordStr);
+		    	
+				if(alumno!=null ) {
+					  	AppSession.setAlumno(alumno);// Guardar las informacion compartido en todas las paginas 
+				        // abre la ventana de /fxml/alumnoMainView.fxml
+					  	
+				        toMainView();
+				        
+				}else {
+					showErrorAlerta("Error","Por favor, introduce cuenta y contraseña otra vez.","Usuario, contraseña y cargo no son correctos." );
+				}
+				// Login with profesor
+	    	}else {
+	    		Profesor profesor = ProfesorCRUD.getProfesorByNombreYPassword(usuario,passwordStr);
+	    		if(profesor!=null) {
+	    			AppSession.setProfesor(profesor);
+	    			toMainView();
+	    			
+	    		}else {
+	    			showErrorAlerta("Error","Por favor, introduce cuenta y contraseña otra vez.","Usuario, contraseña y cargo no son correctos." );
+				}
+	    	}
 	    	
-			if(alumno!=null) {
-				  	AppSession.setAlumno(alumno);// Guardar las informacion compartido en todas las paginas 
-			        // Cerrar la ventana actual
-			        Stage currentStage = (Stage) loginBtn.getScene().getWindow();
-			        currentStage.close();
-			        
-			        // abre la ventana de /fxml/alumnoMainView.fxml
-			        try {
-						Parent root = FXMLLoader.load(getClass().getResource("/fxml/alumnoMainView.fxml"));
-						Stage stage = new Stage();
-						stage.setScene(new Scene(root,1000,600));
-						stage.show();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-			        
-			}else {
-			    alerta = new Alert(Alert.AlertType.WARNING);
-		        alerta.setTitle("Error");
-		        alerta.setHeaderText("Por favor, introduce cuenta y contraseña otra vez.");
-		        alerta.setContentText("Usuario, contraseña y cargo no son correctos.");
-		        alerta.showAndWait();
-			}
 		}
     	
     	
     }
 
-    @FXML
+    private void toMainView() {
+    	Stage currentStage = (Stage) loginBtn.getScene().getWindow();
+        currentStage.close();
+        
+        try {
+			Parent root = FXMLLoader.load(getClass().getResource("/fxml/mainView.fxml"));
+			Stage stage = new Stage();
+			stage.setScene(new Scene(root,1000,600));
+			stage.show();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void showErrorAlerta(String title, String headerText, String contentText) {
+    	Alert alerta;
+		// TODO Auto-generated method stub
+    	alerta = new Alert(Alert.AlertType.WARNING);
+	    alerta.setTitle(title);
+	    alerta.setHeaderText(headerText);
+	    alerta.setContentText(contentText);
+	    alerta.showAndWait();
+	}
+
+	@FXML
     void registrar(ActionEvent event) {
 
     }
@@ -101,10 +123,9 @@ public class loginController {
     
     @FXML
     public void initialize() {
-//    	 Image image = new Image(getClass().getResource("/img/logo.png").toExternalForm());
-//    	 logo.setImage(image);
-    	 cargoCombo.getItems().addAll("PROFESOR", "ALUMNO");
-//    
+    	 cargoCombo.getItems().addAll("PROFESOR", "ALUMNO"); 
     }
+    
+    
 
 }
