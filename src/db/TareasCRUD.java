@@ -92,4 +92,110 @@ public class TareasCRUD {
 	        }
 		return lista;
 	}
+	
+	
+	
+	// ---------- MAPPER ----------
+    private static Tarea mapResultSetToTarea(ResultSet rs) throws SQLException {
+        return new Tarea(
+            rs.getInt("id"),
+            rs.getString("titulo"),
+            rs.getString("contenido"),
+            rs.getInt("num_intento"),
+            rs.getDate("fecha_entrega"),
+            rs.getInt("id_unidad"),
+            rs.getString("ruta")
+        );
+    }
+    
+	
+	 // ---------- CREATE ----------
+    public static boolean insertTarea(Tarea t) {
+        String sql = "INSERT INTO modelo_gestion.tarea " +
+                     "(id, titulo, contenido, num_intento, fecha_entrega, id_unidad, ruta) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+        try (Connection conn = ConexionDB.conectar();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, t.getId());
+            pstmt.setString(2, t.getTitulo());
+            pstmt.setString(3, t.getContenido());
+            pstmt.setInt(4, t.getNum_intento());
+            pstmt.setDate(5, new java.sql.Date(t.getFechaEntrega().getTime()));
+            pstmt.setInt(6, t.getId_unidad());
+            pstmt.setString(7, t.getRuta());
+
+            return pstmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    // ---------- READ (GET BY ID) ----------
+    public static Tarea getTareaById(int id) {
+        Tarea tarea = null;
+        String sql = "SELECT * FROM modelo_gestion.tarea WHERE id = ?";
+
+        try (Connection conn = ConexionDB.conectar();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, id);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                tarea = mapResultSetToTarea(rs);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return tarea;
+    }
+    
+ // ---------- UPDATE ----------
+    public static boolean updateTarea(Tarea t) {
+        String sql = "UPDATE modelo_gestion.tarea SET " +
+                     "titulo=?, contenido=?, num_intento=?, fecha_entrega=?, id_unidad=?, ruta=? " +
+                     "WHERE id=?";
+
+        try (Connection conn = ConexionDB.conectar();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, t.getTitulo());
+            pstmt.setString(2, t.getContenido());
+            pstmt.setInt(3, t.getNum_intento());
+            pstmt.setDate(4, new java.sql.Date(t.getFechaEntrega().getTime()));
+            pstmt.setInt(5, t.getId_unidad());
+            pstmt.setString(6, t.getRuta());
+            pstmt.setInt(7, t.getId());
+
+            return pstmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    // ---------- DELETE ----------
+    public static boolean deleteTarea(int id) {
+        String sql = "DELETE FROM modelo_gestion.tarea WHERE id = ?";
+
+        try (Connection conn = ConexionDB.conectar();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, id);
+            return pstmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 }

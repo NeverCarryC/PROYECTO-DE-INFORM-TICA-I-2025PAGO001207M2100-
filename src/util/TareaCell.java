@@ -7,15 +7,20 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
+import javafx.scene.control.MenuItem;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import model.AppSession;
+import model.Modulo;
 import model.Tarea;
+import model.Unidad;
 
 public class TareaCell extends ListCell<Tarea> {
 
@@ -100,7 +105,11 @@ public class TareaCell extends ListCell<Tarea> {
         if (empty || item == null) {
             setText(null);
             setGraphic(null);
-            setContextMenu(null);
+            ContextMenu menuGlobal = createContextMenu();
+            setContextMenu(menuGlobal);
+            
+            
+            
         } else {
             setText(null); // 文字交给 Label 显示
             label.setText(item.toString());
@@ -108,7 +117,21 @@ public class TareaCell extends ListCell<Tarea> {
         }
     }
 
-    // --- 4. 封装跳转逻辑 ---
+    private ContextMenu createContextMenu() {
+    	ContextMenu menuAdd = new ContextMenu();
+    	MenuItem addItem = new MenuItem("Nueva Tarea");
+    	addItem.setOnAction(e -> mostrarDialogAgregar());
+    	menuAdd.getItems().add(addItem);
+    	return menuAdd;
+	}
+
+	private void mostrarDialogAgregar() {
+		System.out.println("触发，右键菜单点击事件");
+		// 参考ModuloController.java
+		//  private Dialog<Modulo> createModuloFormDialog(String title, Unidad unidadDefault, Modulo moduloEditar) 
+	}
+
+	// --- 4. 封装跳转逻辑 ---
     private void abrirVistaDetalle(Tarea tarea) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/tareaDetalleVista.fxml"));

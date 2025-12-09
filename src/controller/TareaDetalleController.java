@@ -172,11 +172,21 @@ public class TareaDetalleController {
         this.asignatura = AsignaturaCRUD.getAsignaturaById(this.unidad.getId_asignatura());
         
         // 使用 unified CRUD 查询是否已经提交过
-        ArrayList<RegistroExamen> intentos = RegistroCRUD.getRegistrosByAlumnoAndExamen(AppSession.getAlumno().getId(),  this.tarea.getId());
-        
-       
+    	ArrayList<RegistroExamen> intentos;
+        if(!AppSession.isAlumno()) {
+        	
+        	intentos = RegistroCRUD.getRegistrosByAlumnoAndExamen(AppSession.getProfesor().getId(),  this.tarea.getId());
+        	System.out.println(intentos);
+        	
+        	
+        }else {
+        	  intentos = RegistroCRUD.getRegistrosByAlumnoAndExamen(AppSession.getAlumno().getId(),  this.tarea.getId());
+        }
+
         int numeroIntentos = intentos.size();
+        
         if(numeroIntentos > 0) {
+        	// 这里要写逻辑，如果是老师打开，Resultado 就要写几个学生已经交作业了
             RegistroExamen primeraEntrega = intentos.get(0);
             empezar.setText("Entregado!!!");
             empezar.setDisable(true);
