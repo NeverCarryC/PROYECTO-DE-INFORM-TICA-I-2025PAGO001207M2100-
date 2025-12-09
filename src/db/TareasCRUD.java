@@ -40,6 +40,34 @@ public class TareasCRUD {
 		
 	}
 	
+	public static ArrayList<Tarea> getAllTareas() {
+		ArrayList<Tarea> tareas = new ArrayList<Tarea>();
+				
+		String sql = "SELECT id, titulo, contenido, num_intento, fecha_entrega, id_unidad, ruta FROM modelo_gestion.tarea;";
+		Connection conn = ConexionDB.conectar();
+		try {
+			PreparedStatement  stmt = conn.prepareStatement(sql);
+			ResultSet rs = stmt.executeQuery();
+			while(rs.next()) {
+				int id = rs.getInt("id");
+				String titulo = rs.getString("titulo");
+				String contenido = rs.getString("contenido");
+				int num_intento = rs.getInt("num_intento");
+				Date fechaEntrga = rs.getDate("fecha_entrega");
+				int id_unidad = rs.getInt("id_unidad");
+				String ruta = rs.getString("ruta");
+				tareas.add(new Tarea(id,titulo,contenido,num_intento,fechaEntrga,id_unidad,ruta));
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return tareas;
+		
+	}
+	
+	
 	// Crear una examen en el curso
 	public static Boolean createExamen(String titulo, String contenido, int id_curso) {
 		int filasAfectadas=0;
@@ -61,6 +89,30 @@ public class TareasCRUD {
 		return filasAfectadas>0;
 	}
 	
+	public static boolean editExamen(int id, String titulo, String contenido, int id_curso) {
+	    String sql = "UPDATE modelo_gestion.examen "
+	               + "SET titulo = ?, contenido = ?, id_curso = ? "
+	               + "WHERE id = ?";
+
+	    int filasAfectadas = 0;
+
+	    try (Connection conn = ConexionDB.conectar();
+	         PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+	        stmt.setString(1, titulo);
+	        stmt.setString(2, contenido);
+	        stmt.setInt(3, id_curso);
+	        stmt.setInt(4, id);  // ← WHERE id = ?
+
+	        filasAfectadas = stmt.executeUpdate();
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return filasAfectadas > 0;
+	}
+
 	public static void main(String[] args) {
 	
 		System.out.println(getTareaByIdUnidad(1));

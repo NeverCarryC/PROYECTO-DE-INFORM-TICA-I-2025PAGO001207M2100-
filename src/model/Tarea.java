@@ -15,6 +15,7 @@ private int id_unidad;
 private String ruta;
 
 
+public Tarea() {}
 public Tarea(int id, String titulo, String contenido, int num_intento, Date fechaEntrega, int id_unidad, String ruta) {
 	super();
 	this.id = id;

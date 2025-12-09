@@ -26,13 +26,14 @@ public class TareaListaController {
     @FXML
     public void initialize() {
 
-    	ArrayList<Tarea> tareaArrayList = TareasCRUD.getTareaByIdUnidad(1);
+    	ArrayList<Tarea> tareaArrayList = TareasCRUD.getAllTareas();
+    	
         // Convertir a ObservableList y vincular al ListView
         ObservableList<Tarea> observableList = FXCollections.observableArrayList(tareaArrayList);
        //tareaListView = new ListView<Tarea>();
        tareaListView.setItems(observableList);
 
-       
+       // System.out.println("TareaListaController:" + tareaArrayList);
         //  Configuración del ListView (CellFactory)
        tareaListView.setCellFactory(param -> new TareaCell());
 

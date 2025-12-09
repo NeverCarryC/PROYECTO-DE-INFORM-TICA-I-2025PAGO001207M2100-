@@ -108,7 +108,31 @@ public class ModuloCRUD {
         
         return null; // 如果失败返回 null
     }
-	
+	public static Modulo getModuloById(int idModulo) {
+	    String sql = "SELECT id, titulo, ruta_archivo, id_unidad FROM modelo_gestion.modulo WHERE id = ?";
+
+	    try (Connection conn = ConexionDB.conectar();
+	         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+	        pstmt.setInt(1, idModulo);
+	        ResultSet rs = pstmt.executeQuery();
+
+	        if (rs.next()) {
+	            return new Modulo(
+	                    rs.getInt("id"),
+	                    rs.getString("titulo"),
+	                    rs.getString("ruta_archivo"),
+	                    rs.getInt("id_unidad")
+	            );
+	        }
+
+	    } catch (SQLException e) {
+	        System.err.println("Error obteniendo módulo por ID: " + e.getMessage());
+	    }
+
+	    return null;
+	}
+
 	public static void main(String[] args) {
 		// addModulo("Test modulo", "",1);
 		// deleteModulo(7);
