@@ -7,12 +7,14 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DoubleStringConverter;
 import model.RegistroExamen;
 import model.Tarea;
+import util.Basico;
 
 public class CalificacionController {
 
@@ -23,6 +25,11 @@ public class CalificacionController {
     @FXML private TableColumn<RegistroExamen, String> colComentario;
     @FXML private TableColumn<RegistroExamen, String> colArchivo;
 
+    @FXML
+    void back(ActionEvent event) {
+    	Basico.back(event, "/fxml/tareaListaView.fxml");
+    }
+    
     private Tarea tareaActual;
 
     @FXML

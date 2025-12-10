@@ -31,6 +31,7 @@ import model.Asignatura;
 import model.RegistroExamen;
 import model.Tarea;
 import model.Unidad;
+import util.Basico;
 
 public class TareaDetalleController {
     
@@ -100,6 +101,11 @@ public class TareaDetalleController {
                 errorAlert.showAndWait();
             }
         });
+    }
+    
+    @FXML
+    void back(ActionEvent event) {
+    	Basico.back(event, "/fxml/tareaListaView.fxml");
     }
     
     // --- 其他方法保持不变 ---

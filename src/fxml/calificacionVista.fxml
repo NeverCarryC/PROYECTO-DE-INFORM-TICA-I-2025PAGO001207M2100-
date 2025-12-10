@@ -1,19 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="controller.CalificacionController">
-    <top>
-        <Label fx:id="lblTitulo" text="Calificación de Tarea" style="-fx-font-size: 18px; -fx-padding: 10;" BorderPane.alignment="CENTER"/>
-    </top>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/25" fx:controller="controller.CalificacionController">
     <center>
         <TableView fx:id="tabla" editable="true">
             <columns>
-                <TableColumn fx:id="colAlumno" text="Alumno" prefWidth="150"/>
-                <TableColumn fx:id="colNota" text="Nota (Edit)" prefWidth="100"/>
-                <TableColumn fx:id="colComentario" text="Comentario (Edit)" prefWidth="250"/>
-                <TableColumn fx:id="colArchivo" text="Archivo" prefWidth="100"/>
+                <TableColumn fx:id="colAlumno" prefWidth="150" text="Alumno" />
+                <TableColumn fx:id="colNota" prefWidth="100" text="Nota (Edit)" />
+                <TableColumn fx:id="colComentario" prefWidth="250" text="Comentario (Edit)" />
+                <TableColumn fx:id="colArchivo" prefWidth="100" text="Archivo" />
             </columns>
         </TableView>
     </center>
+   <top>
+      <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <Button mnemonicParsing="false" onAction="#back" text="&lt;" />
+            <Region prefHeight="101.0" prefWidth="160.0" />
+              <Label fx:id="lblTitulo" style="-fx-font-size: 18px; -fx-padding: 10;" text="Calificación de Tarea" />
+         </children>
+      </HBox>
+   </top>
 </BorderPane>

@@ -1,15 +1,21 @@
 package controller;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
 
+import com.mysql.cj.util.Util;
+
 import db.ModuloCRUD;
 import db.UnidadCRUD;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
@@ -18,14 +24,54 @@ import javafx.util.StringConverter;
 import model.AppSession;
 import model.Modulo;
 import model.Unidad;
+import util.Basico;
 
 public class ModuloController {
 
     private int id_asignatura;
 
     @FXML
+    private Button backBtn;
+    
+    @FXML
+    private Button colapsarBtn;
+    
+    @FXML
     private TreeView<Object> courseTreeView;
 
+
+    @FXML
+    void back(ActionEvent event) {
+    	// Back to AsignaturaListView.fxml
+    	Basico.back(event, "/fxml/asignaturaListaView.fxml");
+    }
+
+    @FXML
+    void colapsar(ActionEvent event) {
+    	 TreeItem<Object> root = courseTreeView.getRoot();
+    	    if (!isCollapsed) {
+    	        // 当前是展开 → 需要折叠
+    	        for (TreeItem<Object> item : root.getChildren()) {
+    	            item.setExpanded(false);
+    	        }
+    	        colapsarBtn.setText("Expandir Todo");
+    	        isCollapsed = true;
+
+    	    } else {
+    	        // 当前是折叠 → 需要展开
+    	        for (TreeItem<Object> item : root.getChildren()) {
+    	            item.setExpanded(true);
+    	        }
+    	        colapsarBtn.setText("Colapsar Todo");
+    	        isCollapsed = false;
+    	    }
+    	  
+    	  
+    }
+    
+
+    private boolean isCollapsed = false;
+    
     public void initialize() {
         // Esperar a que se llame a setId_asignatura
     }

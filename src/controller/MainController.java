@@ -28,7 +28,6 @@ public class MainController {
         menus.add("Tareas");
         menus.add("Perfil");
         menus.add("Ajustes");
-        menus.add("Calificación");
       // Lista -> ObservableList -> ListView
         ObservableList<String> menusData = FXCollections.observableArrayList(menus);
           
@@ -83,8 +82,6 @@ public class MainController {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-				}else if(newValue.equals("calificación")) {
-					
 				}
 			}
 		});
