@@ -9,20 +9,15 @@ import model.Alumno;
 
 public class AlumnoCRUD {
 	public static Alumno getAlumnoById(int id) {
-	    // SQL语句：只根据ID进行查询
 	    String sql = "SELECT id, nombre, apellido, email, password FROM alumno WHERE id = ?";
 	    
-	    // 假设你的数据库连接类是 ConexionDB
 	    try (Connection conn = ConexionDB.conectar();
 	         PreparedStatement stmt = conn.prepareStatement(sql)) {
-	         
-	        // 绑定参数：将传入的ID设置到SQL语句的第一个问号(?)处
 	        stmt.setInt(1, id);
 	        
 	        ResultSet rs = stmt.executeQuery();
 	        
 	        if (rs.next()) {
-	            // 如果找到记录，则创建并返回 Alumno 对象
 	            return new Alumno(
 	                rs.getInt("id"),
 	                rs.getString("nombre"),
@@ -32,10 +27,8 @@ public class AlumnoCRUD {
 	            );
 	        }
 	    } catch (SQLException e) {
-	        // 打印异常信息（在生产环境中应记录日志而不是直接打印）
 	        e.printStackTrace();
 	    }
-	    // 如果没有找到匹配的ID或发生异常，则返回 null
 	    return null; 
 	}
 	

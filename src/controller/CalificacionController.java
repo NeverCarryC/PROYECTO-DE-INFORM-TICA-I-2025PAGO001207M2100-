@@ -36,10 +36,10 @@ public class CalificacionController {
     public void initialize() {
         tabla.setEditable(true);
 
-        // 1. 学生列
+        // 1. Columna alumno
         colAlumno.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getNombreAlumno()));
 
-        // 2. 分数列 (Double + Editable)
+        // 2. columna nota (Double + Editable)
         colNota.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getNota()));
         colNota.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
         colNota.setOnEditCommit(e -> {
@@ -48,7 +48,7 @@ public class CalificacionController {
             RegistroCRUD.updateNotaYComentario(reg.getId(), reg.getNota(), reg.getComentario());
         });
 
-        // 3. 评语列 (String + Editable)
+        // 3. columna comentario (String + Editable)
         colComentario.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getComentario()));
         colComentario.setCellFactory(TextFieldTableCell.forTableColumn());
         colComentario.setOnEditCommit(e -> {
@@ -57,7 +57,7 @@ public class CalificacionController {
             RegistroCRUD.updateNotaYComentario(reg.getId(), reg.getNota(), reg.getComentario());
         });
 
-        // 4. 文件按钮列
+        // 4. Columna archivo
         colArchivo.setCellFactory(col -> new TableCell<RegistroExamen, String>() {
             private final Button btn = new Button("Abrir");
             {

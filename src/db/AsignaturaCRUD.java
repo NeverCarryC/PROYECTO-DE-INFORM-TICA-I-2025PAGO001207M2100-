@@ -19,22 +19,19 @@ import model.Asignatura;
 public class AsignaturaCRUD {
 	
 	public static Asignatura getAsignaturaById(int id_asignatura){
-	    // 确保查询所有需要的字段
 	    String sql = "SELECT id, nombre, id_profesor, create_date, descripcion FROM curso WHERE id=?";
 	    
-	    // 使用 try-with-resources 确保 Connection 和 PreparedStatement 自动关闭
 	    try (Connection conn = ConexionDB.conectar();
 	         PreparedStatement stmt = conn.prepareStatement(sql)) {
-	        
-	        // 1. 设置参数
+
 	        stmt.setInt(1, id_asignatura);
 	        
-	        // 2. 执行查询
+
 	        try (ResultSet rs = stmt.executeQuery()) {
 	            
-	            // 3. 处理结果集
+
 	            if (rs.next()) {
-	                // 如果找到记录，创建并返回 Asignatura 对象
+
 	                return new Asignatura(
 	                    rs.getInt("id"),
 	                    rs.getString("nombre"),
@@ -50,7 +47,7 @@ public class AsignaturaCRUD {
 	        e.printStackTrace();
 	    }
 	    
-	    // 如果没有找到记录或发生异常，返回 null
+
 	    return null;
 	}
 	
@@ -125,15 +122,11 @@ public class AsignaturaCRUD {
 	            Date createDate = rs.getDate("create_date");
 	            String descripcion = rs.getString("descripcion");
 
-	            // 从日期提取年份
 	            Calendar cal = Calendar.getInstance();
 	            cal.setTime(createDate);
 	            int year = cal.get(Calendar.YEAR);
 
-	            // 创建 Curso 对象
 	            Asignatura curso = new Asignatura(id, nombre, idProfesor, createDate, descripcion);
-
-	            // 放入 map 中
 	            cursosPorAnio.computeIfAbsent(year, k -> new ArrayList<>()).add(curso);
 	        }
 
@@ -246,9 +239,9 @@ public class AsignaturaCRUD {
 		Connection conn = ConexionDB.conectar();
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, nombre);      // 对应 SQL 中的第一个 '?' (nombre)
-            pstmt.setString(2, descrString); // 对应 SQL 中的第二个 '?' (descripcion)
-            pstmt.setInt(3, id_asignatura);  // 对应 SQL 中的第三个 '?' (WHERE id)
+			pstmt.setString(1, nombre);      
+            pstmt.setString(2, descrString); 
+            pstmt.setInt(3, id_asignatura);  
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
 		} catch (SQLException e) {

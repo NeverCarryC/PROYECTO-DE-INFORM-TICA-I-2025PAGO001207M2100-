@@ -80,7 +80,6 @@ public class ModuloCRUD {
 	public static Modulo addModulo(String titulo, String ruta_archivo, int id_unidad) {
         String sql = "INSERT INTO modelo_gestion.modulo (titulo, ruta_archivo, id_unidad) VALUES (?, ?, ?)";
 
-        // Statement.RETURN_GENERATED_KEYS 是为了获取数据库自动生成的 ID (Auto Increment)
         try (Connection conn = ConexionDB.conectar();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -91,11 +90,9 @@ public class ModuloCRUD {
             int rowsAffected = pstmt.executeUpdate();
 
             if (rowsAffected > 0) {
-                // 获取生成的 ID
                 try (ResultSet rs = pstmt.getGeneratedKeys()) {
                     if (rs.next()) {
                         int generatedId = rs.getInt(1);
-                        // 返回完整的对象，供 UI 使用
                         return new Modulo(generatedId, titulo, ruta_archivo, id_unidad);
                     }
                 }
@@ -106,7 +103,7 @@ public class ModuloCRUD {
             e.printStackTrace();
         }
         
-        return null; // 如果失败返回 null
+        return null; 
     }
 	public static Modulo getModuloById(int idModulo) {
 	    String sql = "SELECT id, titulo, ruta_archivo, id_unidad FROM modelo_gestion.modulo WHERE id = ?";

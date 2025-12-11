@@ -10,13 +10,13 @@ import model.RegistroExamen;
 public class RegistroCRUD {
 
     // ==========================================
-    //  1. [学生用] 提交作业 (INSERT)
+    //  1. [Para estudiantes] Enviar tarea (INSERTAR)
     // ==========================================
     public static RegistroExamen insertRegistroExamen(RegistroExamen registro) {
         String sql = "INSERT INTO modelo_gestion.registro_examen (id_examen, id_alumno, id_profesor, nota, comentario, ruta_archivo) VALUES (?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = ConexionDB.conectar(); 
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) { // 关键：获取生成的ID
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
             pstmt.setInt(1, registro.getId_examen());
             pstmt.setInt(2, registro.getId_alumno());
@@ -33,7 +33,7 @@ public class RegistroCRUD {
             if (affectedRows > 0) {
                 try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
-                        registro.setId(generatedKeys.getInt(1)); // 设置回生成的 ID
+                        registro.setId(generatedKeys.getInt(1)); 
                         return registro;
                     }
                 }
@@ -41,11 +41,11 @@ public class RegistroCRUD {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null; // 失败返回 null
+        return null; 
     }
 
     // ==========================================
-    //  2. [学生用] 查看自己的提交记录 (用于判断是否交过)
+    //  2. 2. [Para estudiantes] Ver su historial de entrega (para determinar si ha entregado).
     // ==========================================
     public static ArrayList<RegistroExamen> getRegistrosByAlumnoAndExamen(int idAlumno, int idExamen) {
         ArrayList<RegistroExamen> lista = new ArrayList<>();
@@ -65,7 +65,7 @@ public class RegistroCRUD {
     }
 
     // ==========================================
-    //  3. [老师用] 获取某次作业的所有提交 (用于评分列表)
+    // 3. [Para uso del profesor] (para la lista de calificación)
     // ==========================================
     public static ArrayList<RegistroExamen> getRegistrosPorExamen(int idExamen) {
         ArrayList<RegistroExamen> lista = new ArrayList<>();
@@ -76,7 +76,6 @@ public class RegistroCRUD {
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 RegistroExamen reg = mapResultSetToRegistro(rs);
-                // 老师端需要看名字
                //  String nombre = AppSession.getAlumno().getNombre();
                 Alumno alumno = AlumnoCRUD.getAlumnoById(reg.getId_alumno());
                 String nombre = alumno.getNombre();
@@ -90,7 +89,7 @@ public class RegistroCRUD {
     }
 
     // ==========================================
-    //  4. [老师用] 更新分数和评语 (UPDATE)
+    //  4. [Para profesores] Actualizar calificaciones y comentarios  (UPDATE)
     // ==========================================
     public static void updateNotaYComentario(int id, Double nota, String comentario) {
         String sql = "UPDATE modelo_gestion.registro_examen SET nota = ?, comentario = ? WHERE id = ?";
@@ -106,7 +105,7 @@ public class RegistroCRUD {
         }
     }
 
-    // 辅助方法：映射 ResultSet
+
     private static RegistroExamen mapResultSetToRegistro(ResultSet rs) throws SQLException {
         return new RegistroExamen(
             rs.getInt("id"),

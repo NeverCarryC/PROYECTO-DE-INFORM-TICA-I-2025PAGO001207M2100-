@@ -63,7 +63,7 @@ public class TareaDetalleController {
             
             System.out.println("--- Subida Confirmada ---");
             
-            // 1. 创建对象：注意这里使用适合插入的构造函数（没有ID，或者ID为0）
+            // 1. Creación de RegistroExamen
             RegistroExamen nuevoRegistro = new RegistroExamen(
                 0, // ID 占位符，数据库自动生成
                 this.tarea.getId(),
@@ -74,7 +74,7 @@ public class TareaDetalleController {
                 absolutePath
             );
             
-            // 2. 调用修正后的 CRUD 进行插入
+            // 2. Inserta un registro nuevo
             RegistroExamen registroInsertado = RegistroCRUD.insertRegistroExamen(nuevoRegistro);
         
             if (registroInsertado != null) {
@@ -84,14 +84,12 @@ public class TareaDetalleController {
                 successAlert.setContentText("El archivo y el comentario han sido subidos correctamente.");
                 successAlert.showAndWait();
                 
-                // 更新 UI：Button Empezar 变成已提交状态
+                // Actualizar el texto del boton: Empezar -> Entregado
                 this.empezar.setText("Entregado!");
                 this.empezar.setDisable(true);
                 createAndSetupDownloadButton(registroInsertado.getRuta_archivo());
-                // 更新UI： label Resultado
+                // Actualizar el label del resultado(estado)
                 ArrayList<RegistroExamen> intentos = RegistroCRUD.getRegistrosByAlumnoAndExamen(AppSession.getAlumno().getId(),  this.tarea.getId());
-               
-                
                 loadEstado(intentos.size(), intentos);
                 
             } else {
@@ -108,7 +106,7 @@ public class TareaDetalleController {
     	Basico.back(event, "/fxml/tareaListaView.fxml");
     }
     
-    // --- 其他方法保持不变 ---
+
 
     private Dialog<Map<String, String>> createFileUploadDialog(String title){
         Dialog<Map<String, String>> dialog = new Dialog<>();
@@ -167,17 +165,17 @@ public class TareaDetalleController {
         return dialog;
     }
 
-    // 两个名字一样的方法，为了兼容保留，建议统一用 cargaDatosIniciarVista
-    void CargaDatosDeTarea(Tarea tarea){
-        cargaDatosIniciarVista(tarea);
-    }
+
+//    void CargaDatosDeTarea(Tarea tarea){
+//        cargaDatosIniciarVista(tarea);
+//    }
     
     public void cargaDatosIniciarVista(Tarea tarea) {
         this.tarea = tarea;
         this.unidad = UnidadCRUD.getUnidadById(tarea.getId_unidad());
         this.asignatura = AsignaturaCRUD.getAsignaturaById(this.unidad.getId_asignatura());
         
-        // 使用 unified CRUD 查询是否已经提交过
+        // Verificar si se ha realizado una entrega a través de la base de datos.
     	ArrayList<RegistroExamen> intentos;
         if(!AppSession.isAlumno()) {
         	
@@ -192,20 +190,17 @@ public class TareaDetalleController {
         int numeroIntentos = intentos.size();
         
         if(numeroIntentos > 0) {
-        	// 这里要写逻辑，如果是老师打开，Resultado 就要写几个学生已经交作业了
             RegistroExamen primeraEntrega = intentos.get(0);
             empezar.setText("Entregado!!!");
             empezar.setDisable(true);
             createAndSetupDownloadButton(primeraEntrega.getRuta_archivo());
         }
         
-        // 读取考试的成绩
-        // 1. 没提交
-        // 2. 提交了没批改
-        // 3. 批改了
-  
+        // Estados:
+        // 1. no entregado
+        // 2. entregado, pero sin calificar
+        // 3. calificado
         loadEstado(numeroIntentos, intentos);
-
         
         this.name.setText(tarea.getTitulo());
         this.fechaEntrega.setText("Fecha de entrega: " + tarea.getFechaEntrega().toString());
@@ -224,7 +219,6 @@ public class TareaDetalleController {
     
     
     private void loadEstado(int numeroIntentos, ArrayList<RegistroExamen> intentos) {
-		// TODO Auto-generated method stub
     	String resultadoString ="";
     	  if(numeroIntentos == 0) {
           	resultadoString = "Resultado: No entregado";

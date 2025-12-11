@@ -50,7 +50,7 @@ public class ModuloController {
     void colapsar(ActionEvent event) {
     	 TreeItem<Object> root = courseTreeView.getRoot();
     	    if (!isCollapsed) {
-    	        // 当前是展开 → 需要折叠
+    	        // colapsar → Expandir
     	        for (TreeItem<Object> item : root.getChildren()) {
     	            item.setExpanded(false);
     	        }
@@ -58,7 +58,7 @@ public class ModuloController {
     	        isCollapsed = true;
 
     	    } else {
-    	        // 当前是折叠 → 需要展开
+    	        // Expandir → colapsar
     	        for (TreeItem<Object> item : root.getChildren()) {
     	            item.setExpanded(true);
     	        }
@@ -244,7 +244,7 @@ public class ModuloController {
 
             File file = new File(ruta);
             if (file.exists()) {
-                // 使用 Java AWT Desktop 类打开文件
+                // Abrir archivo
                 if (java.awt.Desktop.isDesktopSupported()) {
                     java.awt.Desktop.getDesktop().open(file);
                 } else {
@@ -260,9 +260,9 @@ public class ModuloController {
 	}
 
     /**
-     * 创建模块对话框 (通用)
-     * @param unidadDefault 默认选中的单元
-     * @param moduloEditar 如果是编辑模式，传入旧模块对象；如果是新建，传入 null
+     * Crea un diálogo para la gestión de módulos (Genérico)
+     * @param unidadDefault La unidad seleccionada por defecto al abrir el diálogo.
+     * @param moduloEditar moduloEditar El objeto de módulo a editar (para modo edición) o null (para modo creación/nuevo).
      */
     private Dialog<Modulo> createModuloFormDialog(String title, Unidad unidadDefault, Modulo moduloEditar) {
         Dialog<Modulo> dialog = new Dialog<>();
@@ -273,12 +273,12 @@ public class ModuloController {
         GridPane grid = new GridPane();
         grid.setHgap(10); grid.setVgap(10); grid.setPadding(new Insets(20));
 
-        // 1. 名字字段
+        // 1. Campo nombre
         TextField nameField = new TextField();
         nameField.setPromptText("Nombre del módulo");
         if (moduloEditar != null) nameField.setText(moduloEditar.getTitulo());
 
-        // 2. 文件字段
+        // 2. Campo archivo
         TextField pathField = new TextField();
         pathField.setEditable(false); // 只读，只能通过按钮修改
         if (moduloEditar != null) pathField.setText(moduloEditar.getRuta_archivo());
@@ -289,17 +289,17 @@ public class ModuloController {
             if(f != null) pathField.setText(f.getAbsolutePath());
         });
 
-        // 3. 单元下拉框
+        // 3. combobox unidad
         ComboBox<Unidad> unitCombo = new ComboBox<>();
         unitCombo.getItems().addAll(UnidadCRUD.getUnidadsByIdAsignatura(this.id_asignatura));
         
-        // 设置下拉框显示的文字
+        // configurar el texto
         unitCombo.setConverter(new StringConverter<Unidad>() {
             public String toString(Unidad u) { return u == null ? "" : u.getNombre(); }
             public Unidad fromString(String s) { return null; }
         });
 
-        // 选中默认单元
+        // selecionado por defecto
         int targetUnidadId = (moduloEditar != null) ? moduloEditar.getId_unidad() : unidadDefault.getId();
         for(Unidad u : unitCombo.getItems()) {
             if(u.getId() == targetUnidadId) { 
@@ -314,10 +314,9 @@ public class ModuloController {
         
         dialog.getDialogPane().setContent(grid);
 
-        // 转换结果
+        // resultado
         dialog.setResultConverter(b -> {
             if (b == saveBtn && !nameField.getText().isEmpty() && unitCombo.getValue() != null) {
-                // 返回一个临时的 Modulo 对象，ID 设为 0 或者保留原 ID
                 int id = (moduloEditar != null) ? moduloEditar.getId() : 0;
                 return new Modulo(id, nameField.getText(), pathField.getText(), unitCombo.getValue().getId());
             }
@@ -329,9 +328,7 @@ public class ModuloController {
     
     
     /**
-     * 辅助方法：将源文件复制到项目目录 "archivos_curso"
-     * @param rutaOriginal 用户选择的源文件路径
-     * @return 复制后的新绝对路径 (如果出错返回 null)
+     * Guardar archivo
      */
     private String guardarArchivoEnProyecto(String rutaOriginal) {
         if (rutaOriginal == null || rutaOriginal.isEmpty()) return null;
@@ -340,7 +337,6 @@ public class ModuloController {
         File destDir = new File("archivos_curso"); 
         if (!destDir.exists()) destDir.mkdir();
 
-        // 简单起见用原文件名，实际项目建议加 UUID 防止重名
         File destFile = new File(destDir, sourceFile.getName());
 
         try {
@@ -357,7 +353,6 @@ public class ModuloController {
         }
     }
     
- // 简单的弹窗辅助方法
     private void mostrarAlerta(String titulo, String contenido) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(titulo);
@@ -497,23 +492,22 @@ public class ModuloController {
 
    
     private void handleAddModulo(Unidad currentUnidad) {
-        // 传入 null 表示是“新建模式”
+        // null -> añadir modulo
         Dialog<Modulo> dialog = createModuloFormDialog("Nuevo Módulo", currentUnidad, null);
         
         dialog.showAndWait().ifPresent(tempMod -> {
-            // 1. 处理文件
+            // 1. guardar el archivo
             String finalPath = guardarArchivoEnProyecto(tempMod.getRuta_archivo());
             
-            // 2. 存库
+            // 2. Guardar en la tabla modulo
             // Modulo addModulo(String titulo, String ruta_archivo, int id_unidad)
-            System.out.println(finalPath);
+            // System.out.println(finalPath);
             Modulo newMod = ModuloCRUD.addModulo(tempMod.getTitulo(), finalPath, tempMod.getId_unidad());
             
-            // 3. 更新 UI
+            // 3. Actualizar UI
             if (newMod != null) {
                 TreeItem<Object> targetParentItem = findTreeItemByUnidadId(newMod.getId_unidad());
                 if (targetParentItem != null) {
-                    // 记得用 Object 泛型
                     targetParentItem.getChildren().add(new TreeItem<Object>(newMod));
                     targetParentItem.setExpanded(true);
                 }
@@ -532,16 +526,16 @@ public class ModuloController {
 
     
     private void handleEditModulo(Modulo modulo, TreeItem<Object> item) {
-        // 1. 调用上面的通用对话框，传入当前模块作为初始值
-        // 注意：这里 findUnidadById 是个假设的方法，你可以直接从 item.getParent().getValue() 获取当前单元
+    
+
         Unidad currentUnidad = (Unidad) item.getParent().getValue(); 
         Dialog<Modulo> dialog = createModuloFormDialog("Editar Módulo", currentUnidad, modulo);
 
         dialog.showAndWait().ifPresent(resultMod -> {
-            String finalPath = modulo.getRuta_archivo(); // 默认保持旧路径
+            String finalPath = modulo.getRuta_archivo(); 
 
-            // --- A. 检查文件是否改变 ---
-            // 如果新路径不为空，且和旧路径不一样 -> 说明用户选了新文件
+            // --- A. Guardar archivo
+            // Si la nueva ruta no está vacía y es diferente de la ruta anterior, significa que el usuario ha seleccionado un nuevo archivo.
             if (resultMod.getRuta_archivo() != null && !resultMod.getRuta_archivo().equals(modulo.getRuta_archivo())) {
                 String newStoredPath = guardarArchivoEnProyecto(resultMod.getRuta_archivo());
                 if (newStoredPath != null) {
@@ -549,39 +543,39 @@ public class ModuloController {
                 }
             }
 
-            // --- B. 更新数据库 ---
+            // --- B. guardar en la tabla modulo ---
             System.out.println(finalPath);
             boolean success = ModuloCRUD.editModulo(
                 modulo.getId(), 
                 resultMod.getTitulo(), 
                 finalPath, 
-                resultMod.getId_unidad() // 这里是用户在下拉框选的新ID
+                resultMod.getId_unidad() // Esta es la nueva ID seleccionada por el usuario en el menú desplegable.
             );
 
             if (success) {
-                // --- C. 更新内存对象 ---
+                // --- C. Actualizar el model clase ---
                 modulo.setTitulo(resultMod.getTitulo());
                 modulo.setRuta_archivo(finalPath);
                 int oldUnidadId = modulo.getId_unidad();
                 int newUnidadId = resultMod.getId_unidad();
                 modulo.setId_unidad(newUnidadId); // 更新 ID
 
-                // --- D. 更新 TreeView UI ---
+                // --- D. actualizar TreeView UI ---
                 
-                // 情况 1: 单元没变，只是改了字或文件
+                // Caso 1: La unidad en sí no ha cambiado; solo se ha modificado el texto o el nombre del archivo.
                 if (oldUnidadId == newUnidadId) {
-                    // 强制刷新当前节点（触发 CellFactory 更新）
-                    // 技巧：先设为 null 再设回来，或者直接用 fireEvent，最简单是重置一下 value
+                    // Forzar la actualización del nodo actual (activa la actualización de CellFactory)
+                    // Consejos: Establézcalo primero en nulo y luego restablézcalo, o use fireEvent directamente. La forma más sencilla es restablecer el valor.
                     item.setValue(null); 
                     item.setValue(modulo); 
                     // 或者更优雅的：courseTreeView.refresh();
                 } 
-                // 情况 2: 用户把模块移动到了另一个单元 (麻烦的情况)
+                // Caso 2: El usuario movió el módulo a otra unidad (una situación problemática).
                 else {
-                    // 1. 从旧爸爸那里移除自己
+                    // 1. Remove
                     item.getParent().getChildren().remove(item);
 
-                    // 2. 找新爸爸
+                    // 2. add
                     TreeItem<Object> newParentItem = findTreeItemByUnidadId(newUnidadId);
                     if (newParentItem != null) {
                         newParentItem.getChildren().add(item);

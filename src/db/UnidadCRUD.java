@@ -18,35 +18,27 @@ public class UnidadCRUD {
 	}
 	
 	
-//	public static ArrayList<Unidad> getUnidadsYModulosByIdAsignatura(int id_asignatura){
-//		
-//		
-//	}
+
 	
 	public static Unidad getUnidadById(int id_unidad) {
         Unidad unidad = null;
-        // 注意：只查询 Unidad 表
+ 
         String sqlString = "SELECT id, nombre, descripcion, id_asignatura FROM modelo_gestion.unidad WHERE id = ?;";
         Connection conn = ConexionDB.conectar();
         
         try {
-            // 1. 准备和执行查询
             PreparedStatement stmt = conn.prepareStatement(sqlString);
             stmt.setInt(1, id_unidad);
             ResultSet rs = stmt.executeQuery();
             
-            // 2. 处理结果集
-            if (rs.next()) { // 只期望有一个结果
+            if (rs.next()) {
                 int id = rs.getInt("id");
                 String nombre = rs.getString("nombre");
                 String descripcion = rs.getString("descripcion");
                 int id_asignatura = rs.getInt("id_asignatura");
                 
-                // 3. 获取 Modulos 列表
-                // 使用 ModuloCRUD 类中已有的方法获取子模块
                 ArrayList<Modulo> modulos = ModuloCRUD.getModulosByIdUnidad(id);
                 
-                // 4. 构建最终的 Unidad 对象
                 unidad = new Unidad(id, nombre, descripcion, modulos, id_asignatura);
             }
             
@@ -54,8 +46,7 @@ public class UnidadCRUD {
             System.err.println("发生 SQL 错误，无法获取 Unidad (ID: " + id_unidad + ")");
             e.printStackTrace();
         } finally {
-            // 确保关闭连接，尽管你的代码结构中 `ConexionDB.conectar()` 返回的连接可能需要在外部或使用 try-with-resources 关闭
-            // 这里假设 ConexionDB.conectar() 返回的连接会在其他地方管理关闭。
+
         }
         
         return unidad;
@@ -106,7 +97,6 @@ public class UnidadCRUD {
 
 	        if (filas > 0) {
 
-	            // ✔ 获取 INSERT 自动生成的 ID
 	            ResultSet rs = stmt.getGeneratedKeys();
 	            if (rs.next()) {
 	                int idGenerado = rs.getInt(1);
@@ -153,9 +143,9 @@ public class UnidadCRUD {
 		Connection conn =  ConexionDB.conectar();
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, nombre);      // 对应 SQL 中的第一个 '?' (nombre)
-            pstmt.setString(2, descrip); // 对应 SQL 中的第二个 '?' (descripcion)
-            pstmt.setInt(3, id);  // 对应 SQL 中的第三个 '?' (WHERE id)
+			pstmt.setString(1, nombre);    
+            pstmt.setString(2, descrip); 
+            pstmt.setInt(3, id);  
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
 		} catch (SQLException e) {

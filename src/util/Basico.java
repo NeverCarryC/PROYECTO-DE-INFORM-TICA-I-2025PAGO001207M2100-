@@ -20,7 +20,6 @@ public class Basico {
 		    	
 		        rootPane.setCenter(newView);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	    	
