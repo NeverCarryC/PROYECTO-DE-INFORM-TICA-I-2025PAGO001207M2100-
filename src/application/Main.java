@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 
 
@@ -33,7 +34,9 @@ public class Main extends Application {
         Parent root = loader.load();
         // 3. Crear una escena utilizando el nodo raíz y establecer el tamaño de la ventana.
         Scene scene = new Scene(root, 1000,600);
-        stage.setTitle("JavaFX alumno camupus");
+        stage.setTitle("JavaFX camupus");
+        Image icon = new Image(getClass().getResourceAsStream("/img/icon.png"));
+        stage.getIcons().add(icon);
         stage.setScene(scene);
         stage.show();
     }

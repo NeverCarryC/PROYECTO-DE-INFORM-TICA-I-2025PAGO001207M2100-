@@ -44,6 +44,7 @@ public class AsignaturaListController {
         // Convertir a ObservableList y vincular al ListView
         ObservableList<Asignatura> observableList = FXCollections.observableArrayList(cursos);
         cursoLista.setItems(observableList);
+        cursoLista.getSelectionModel().select(0);
     }
 
     // =================================================================

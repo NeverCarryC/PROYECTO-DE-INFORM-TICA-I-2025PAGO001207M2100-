@@ -32,6 +32,8 @@ public class MainController {
         ObservableList<String> menusData = FXCollections.observableArrayList(menus);
           
         navigacionBar.setItems(menusData);
+        
+        
         // Aquí añadimos un listener al ListView
         // Cuando el usuario selecciona "Curso", se carga la página de cursos.
         // Si selecciona "Perfil", se carga la vista de perfil.
@@ -85,7 +87,7 @@ public class MainController {
 				}
 			}
 		});
-        
+        navigacionBar.getSelectionModel().select(0);
     }
 
 }

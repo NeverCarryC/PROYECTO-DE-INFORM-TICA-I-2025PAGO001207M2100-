@@ -15,6 +15,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import model.Alumno;
@@ -95,6 +96,9 @@ public class loginController {
 			Parent root = FXMLLoader.load(getClass().getResource("/fxml/mainView.fxml"));
 			Stage stage = new Stage();
 			stage.setScene(new Scene(root,1000,600));
+			stage.setTitle("JavaFX camupus");
+			Image icon = new Image(getClass().getResourceAsStream("/img/icon.png"));
+		    stage.getIcons().add(icon);
 			stage.show();
 		} catch (IOException e) {
 			e.printStackTrace();
