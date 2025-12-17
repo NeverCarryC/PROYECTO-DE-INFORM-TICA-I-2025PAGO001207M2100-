@@ -43,11 +43,9 @@ public class AsignaturaCRUD {
 	        }
 	        
 	    } catch (SQLException e) {
-	        System.err.println("发生 SQL 错误，无法获取 Asignatura (ID: " + id_asignatura + ")");
+	        System.err.println("Error，(ID: " + id_asignatura + ")");
 	        e.printStackTrace();
 	    }
-	    
-
 	    return null;
 	}
 	

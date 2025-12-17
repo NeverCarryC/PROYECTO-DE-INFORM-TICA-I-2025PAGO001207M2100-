@@ -131,8 +131,8 @@ public class AsignaturaListController {
                 new Alert(Alert.AlertType.WARNING, "¡El nombre no puede estar vacío!").show();
                 return;
             }
-
-            int currentProfesorId = AppSession.getAlumno().getId();
+            // Bug
+            int currentProfesorId = AppSession.getProfesor().getId();
             Asignatura newAsignatura = AsignaturaCRUD.insertarAsignatura(nombre, currentProfesorId, desc);
 
             if (newAsignatura != null) {
