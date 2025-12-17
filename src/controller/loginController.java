@@ -95,7 +95,11 @@ public class loginController {
         try {
 			Parent root = FXMLLoader.load(getClass().getResource("/fxml/mainView.fxml"));
 			Stage stage = new Stage();
-			stage.setScene(new Scene(root,1000,600));
+			Scene scene = new Scene(root,1000,600);
+
+			stage.setScene(scene);
+			scene.getStylesheets().add(getClass().getResource("/application/application.css").toExternalForm());
+// scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			stage.setTitle("JavaFX camupus");
 			Image icon = new Image(getClass().getResourceAsStream("/img/icon.png"));
 		    stage.getIcons().add(icon);
