@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.HistorialController">
+   <children>
+      <Label text="El contenido del pagina Historial" />
+     <HBox alignment="CENTER" prefHeight="180.0" prefWidth="593.0">
+         <children>
+            <ImageView fx:id="Squirtle3Img" fitHeight="232.0" fitWidth="246.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../img/Squirtle3.png" />
+               </image>
+            </ImageView>
+               <ImageView fx:id="miao3Img" fitHeight="240.0" fitWidth="237.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../img/miao3.png" />
+               </image>
+            </ImageView>
+               <ImageView fx:id="huo3Img" fitHeight="243.0" fitWidth="239.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../img/huo3.png" />
+               </image>
+            </ImageView>
+         </children>
+      </HBox>
+   </children>
+</VBox>

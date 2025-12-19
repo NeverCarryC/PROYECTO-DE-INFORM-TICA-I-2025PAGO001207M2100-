@@ -134,6 +134,24 @@ public class MainController {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+				}else if(selectedName.equals("Calendario")) {
+					FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/calendarioView.fxml"));
+					try {
+						Parent view =loader.load();
+						rootPane.setCenter(view);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}else if(selectedName.equals("Historial")) {
+					FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/historialView.fxml"));
+					try {
+						Parent view =loader.load();
+						rootPane.setCenter(view);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}});
     	  
