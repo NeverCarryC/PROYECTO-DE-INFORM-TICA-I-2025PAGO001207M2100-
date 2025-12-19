@@ -21,30 +21,27 @@ public class CalendarioController {
     @FXML
     public void initialize() {
 
-//        RotateTransition rt = new RotateTransition(Duration.seconds(2), SquirtleImg);
-//        rt.setByAngle(360);                         // 旋转 360 度
-//        rt.setCycleCount(RotateTransition.INDEFINITE); // 无限循环
-//        rt.play();                                   // 开始动画
+
 
      
-    	ScaleTransition ttSquirtle = new ScaleTransition(Duration.seconds(0.3), Squirtle2Img);
+    	ScaleTransition ttSquirtle = new ScaleTransition(Duration.seconds(0.2), Squirtle2Img);
     	ttSquirtle.setFromX(1);
     	ttSquirtle.setFromY(1);
     	ttSquirtle.setToX(1.2);
     	ttSquirtle.setToY(1.2);
     	ttSquirtle.setCycleCount(ScaleTransition.INDEFINITE);
     	ttSquirtle.setAutoReverse(true);
-
+    	ttSquirtle.setDelay(Duration.seconds(0.1));
     	
     	   
-    	ScaleTransition ttHuo = new ScaleTransition(Duration.seconds(0.3), huo2Img);
+    	ScaleTransition ttHuo = new ScaleTransition(Duration.seconds(0.2), huo2Img);
     	ttHuo.setFromX(1);
     	ttHuo.setFromY(1);
     	ttHuo.setToX(1.2);
     	ttHuo.setToY(1.2);
     	ttHuo.setCycleCount(ScaleTransition.INDEFINITE);
     	ttHuo.setAutoReverse(true);
-    	
+    	 ttHuo.setDelay(Duration.seconds(0.3));
     	
 //        TranslateTransition ttHuo = new TranslateTransition(Duration.seconds(0.3), huo2Img);
 //        ttHuo.setByY(-35);
@@ -52,14 +49,14 @@ public class CalendarioController {
 //        ttHuo.setAutoReverse(true);
 
     	
-    	ScaleTransition ttMiao = new ScaleTransition(Duration.seconds(0.3), miao2Img);
+    	ScaleTransition ttMiao = new ScaleTransition(Duration.seconds(0.2), miao2Img);
     	ttMiao.setFromX(1);
     	ttMiao.setFromY(1);
     	ttMiao.setToX(1.2);
     	ttMiao.setToY(1.2);
     	ttMiao.setCycleCount(ScaleTransition.INDEFINITE);
     	ttMiao.setAutoReverse(true);
-    	
+    	ttMiao.setDelay(Duration.seconds(0.2));
     	
 //        TranslateTransition ttMiao = new TranslateTransition(Duration.seconds(0.3), miao2Img);
 //        ttMiao.setByY(-50);

@@ -31,17 +31,19 @@ public class PerfilController {
         ttSquirtle.setByY(-30);
         ttSquirtle.setCycleCount(TranslateTransition.INDEFINITE);
         ttSquirtle.setAutoReverse(true);
-
+        ttSquirtle.setDelay(Duration.seconds(0.1));
+        
         TranslateTransition ttHuo = new TranslateTransition(Duration.seconds(0.2), huo1Img);
         ttHuo.setByY(-30);
         ttHuo.setCycleCount(TranslateTransition.INDEFINITE);
         ttHuo.setAutoReverse(true);
-
+        ttHuo.setDelay(Duration.seconds(0.3));
+        
         TranslateTransition ttMiao = new TranslateTransition(Duration.seconds(0.2), miao1Img);
         ttMiao.setByY(-30);
         ttMiao.setCycleCount(TranslateTransition.INDEFINITE);
         ttMiao.setAutoReverse(true);
-
+        ttMiao.setDelay(Duration.seconds(0.2));
 
         ParallelTransition parallel = new ParallelTransition(ttSquirtle, ttHuo, ttMiao);
         parallel.play();
