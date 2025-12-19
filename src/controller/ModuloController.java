@@ -72,9 +72,7 @@ public class ModuloController {
 
     private boolean isCollapsed = false;
     
-    public void initialize() {
-        // Esperar a que se llame a setId_asignatura
-    }
+    public void initialize() {}
 
     public void setId_asignatura(int id) {
         this.id_asignatura = id;
@@ -219,8 +217,6 @@ public class ModuloController {
             cell.setOnMouseClicked(event -> {
             	if (event.getClickCount() == 2 && !cell.isEmpty()) {
                     Object item = cell.getItem();
-                    
-                    // 3. 只有当点击的是 Modulo 时才触发
                     if (item instanceof Modulo) {
                         Modulo m = (Modulo) item;
                         abrirArchivoLocal(m.getRuta_archivo()); // 调用打开文件的方法
@@ -259,11 +255,8 @@ public class ModuloController {
         }
 	}
 
-    /**
-     * Crea un diálogo para la gestión de módulos (Genérico)
-     * @param unidadDefault La unidad seleccionada por defecto al abrir el diálogo.
-     * @param moduloEditar moduloEditar El objeto de módulo a editar (para modo edición) o null (para modo creación/nuevo).
-     */
+
+     // Crea un diálogo para la gestión de módulos (Genérico)
     private Dialog<Modulo> createModuloFormDialog(String title, Unidad unidadDefault, Modulo moduloEditar) {
         Dialog<Modulo> dialog = new Dialog<>();
         dialog.setTitle(title);
@@ -672,9 +665,7 @@ public class ModuloController {
     }
 }
 
-// =========================================================
-//  Clases auxiliares (Helper Classes)
-// =========================================================
+
 
 /**
  * Clase auxiliar para representar el nodo de descripción en el TreeView.

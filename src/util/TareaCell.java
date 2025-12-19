@@ -26,6 +26,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
@@ -46,19 +47,23 @@ import model.Unidad;
 
 public class TareaCell extends ListCell<Tarea> {
 
-    // UI 组件
+    // Componentes de la UI
     private final HBox hbox = new HBox();
     private final Label label = new Label();
     private final Pane spacer = new Pane();
-    private final Button btnOpen = new Button("Open");
-    private final Button btnEdit = new Button("Edit");
-    private final Button btnDelete = new Button("Delete");
+    private final Button btnOpen = new Button("Abrir");
+    private final Button btnEdit = new Button("Editar");
+    private final Button btnDelete = new Button("Eliminar");
     private final Button btnGrade = new Button("Calificación");
-
+    
+    // La funcion de constructor:
+    // 1. Definir layout
+    // 2. Definir evento
     public TareaCell() {
         super();
 
-        // --- 1. 布局设置 ---
+        // --- 1. En caso de que el usuario sea profesor, puede abrir, editar, eliminar y calificar.
+        // ---     En caso de que sea estudiante, solo puede visualizar la información.
         if(!AppSession.isAlumno()) {        	
         	hbox.getChildren().addAll(label, spacer, btnOpen, btnEdit, btnDelete, btnGrade);
         }else {
@@ -66,11 +71,9 @@ public class TareaCell extends ListCell<Tarea> {
         }
         hbox.setAlignment(Pos.CENTER_LEFT);
         hbox.setSpacing(5);
-        HBox.setHgrow(spacer, Priority.ALWAYS); // 把按钮顶到右边
-
-        // --- 2. 按钮事件 ---
+        HBox.setHgrow(spacer, Priority.ALWAYS); 
         
-        // "Open" 按钮：调用和双击一样的逻辑
+        // --- 2. Eventos de los botones ---
         btnOpen.setOnAction(event -> {
             Tarea item = getItem();
             if (item != null) {
@@ -79,29 +82,32 @@ public class TareaCell extends ListCell<Tarea> {
         });
 
         btnEdit.setOnAction(event -> {
-        	// System.out.println("编辑: " + getItem());
         	mostrarDialogAgregar(getItem());
         });
         
+       
         btnDelete.setOnAction(event -> {
             Tarea item = getItem();
-            getListView().getItems().remove(item); // 从列表中移除
-            // TareasCRUD.delete(item.getId()); // 别忘了调用数据库删除
+            getListView().getItems().remove(item); 
+            // Ojo: getListView() devolver The ListView associated with this Cell.
+            // Es decir, devolver la lista de tareas -> private ListView<Tarea> tareaListView;
+            TareasCRUD.deleteTarea(item.getId()); 
         });
 
         btnGrade.setOnAction(event -> {
             Tarea item = getItem();
             if (item != null) {
                 try {
-                    // 加载评分视图
+                    // Carga la vista de calificacionVista.fxml
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/calificacionVista.fxml"));
                     Parent view = loader.load();
                     
-                    // 传递当前任务数据给控制器
+                    // Obtener el controller CalificacionController
                     controller.CalificacionController ctrl = loader.getController();
+                    // Carga los datos 
                     ctrl.initData(item);
                     
-                    // 切换主界面中心内容
+                    // Cambiar el contenido central del BorderPane
                     if (getScene() != null) {
                         BorderPane rootPane = (BorderPane) getScene().getRoot();
                         rootPane.setCenter(view);
@@ -111,12 +117,10 @@ public class TareaCell extends ListCell<Tarea> {
                 }
             }
         });
-        // --- 3. 双击事件 (逻辑移到这里) ---
+        // --- 3. Evento de doble clic ---
         this.setOnMouseClicked(event -> {
-            // 确保不为空，且是左键，且是双击
             if (!isEmpty() && getItem() != null && event.getButton() == MouseButton.PRIMARY) {
                 if (event.getClickCount() == 2) {
-                    // System.out.println("检测到双击: " + getItem());
                     abrirVistaDetalle(getItem());
                 }
             }
@@ -124,39 +128,29 @@ public class TareaCell extends ListCell<Tarea> {
     }
 
     @Override
+    // La funcion de updateItem(...):
+    // Actualiza el contenido de la celda(FILA) según el elemento asociado
     protected void updateItem(Tarea item, boolean empty) {
+    	// item es modelo en la fila actual
         super.updateItem(item, empty);
-
         if (empty || item == null) {
             setText(null);
             setGraphic(null);
             ContextMenu menuGlobal = createContextMenu();
             setContextMenu(menuGlobal);    
         } else {
-            setText(null); // 文字交给 Label 显示
-            
-            
-           // label.setText(item.toString());
-            
-            // --- 修改这里 ---
-            // 不要只写 item.toString()，我们手动拼接更多信息
+            setText(null); 
             String info = item.getTitulo();
-            
-            // 如果有截止日期，显示出来
             if (item.getFechaEntrega() != null) {
                 info += " (Entrega: " + item.getFechaEntrega().toString() + ")";
             }
-            
-            // 显示尝试次数，方便调试确认数据变了
             info += " [Intentos: " + item.getNum_intento() + "]";
-            
             label.setText(info);
-            // ----------------
-            
             setGraphic(hbox);
         }
     }
 
+    
     private ContextMenu createContextMenu() {
     	ContextMenu menuAdd = new ContextMenu();
     	MenuItem addItem = new MenuItem("Nueva Tarea");
@@ -166,37 +160,25 @@ public class TareaCell extends ListCell<Tarea> {
 	}
 
 	private void mostrarDialogAgregar(Tarea tareaEditar) {
-		// System.out.println("触发，右键菜单点击事件");
-		// 参考ModuloController.java
-		//  private Dialog<Modulo> createModuloFormDialog(String title, Unidad unidadDefault, Modulo moduloEditar) 
 		if(!AppSession.isAlumno()) {
 			Dialog<Tarea> dialog = createTareaFormDialog(tareaEditar);
 		    dialog.showAndWait().ifPresent(t -> {
-
-	            // 2. 存库
-	            // Modulo addModulo(String titulo, String ruta_archivo, int id_unidad)
 		    	if(tareaEditar!=null) {
 		    		TareasCRUD.updateTarea(t);
 		    	}else {
 		    		 TareasCRUD.insertTarea(t);
 		    	}
 	                    
-	            // 3. 更新 UI
 	            if(tareaEditar!=null) {
 	            	
 	            	 int index = getListView().getItems().indexOf(tareaEditar);
 	            	    if (index >= 0) {
-	            	        getListView().getItems().set(index, t); // 用新对象替换旧对象
+	            	        getListView().getItems().set(index, t);
 	            	    }
-	            	
-	           
-	                
-	            	// getListView().refresh();
 	            }else {
 	            	getListView().getItems().add(t);
 	 	            getListView().getSelectionModel().select(t);
 	            }
-	           
 	        });
 		}
 	
@@ -242,13 +224,11 @@ public class TareaCell extends ListCell<Tarea> {
 	     }
 	     
 	     /* --------------------------
-	       Combo Asignatura
+	       Compo Asignatura
 	    --------------------------- */
 	    
 	     ComboBox<Asignatura> asigCombo = new ComboBox<>();
 	     asigCombo.getItems().addAll(AsignaturaCRUD.getAllAsignaturas());
-	        
-	        // 设置下拉框显示的文字
 	     asigCombo.setConverter(new StringConverter<Asignatura>() {
 
 			@Override
@@ -268,28 +248,15 @@ public class TareaCell extends ListCell<Tarea> {
 	    	  Unidad unidad = UnidadCRUD.getUnidadById(idUnidad);
 	    	  int selectedIdAsignatura = unidad.getId_asignatura();
 	    	  Asignatura asignatura = AsignaturaCRUD.getAsignaturaById(selectedIdAsignatura);
-	    	  
-	    	
-	    	 
-	    	 
-	    	 asigCombo.getSelectionModel().select(
-	    			 asignatura
-	  	         );
+	    	  asigCombo.getSelectionModel().select(asignatura);
 	     }
-	    	 
-	     
-	      
-	     
 	     /* --------------------------
-	       Combo Unidad (depende de Asignatura)
+	       Compo Unidad (depende de Asignatura)
 	    --------------------------- */
 	     
 	     ComboBox<Unidad> unitCombo = new ComboBox<>();
 	     if (tareaEditar != null) {
 	    	 int selectedIdUnidad = tareaEditar.getid_unidad();
-	    	 System.out.println(selectedIdUnidad);
-	    	// Modulo modulo = ModuloCRUD.getModuloById(selectedIdModulo);
-
 	    	 Unidad unidad = UnidadCRUD.getUnidadById(selectedIdUnidad);
 	    	 int selectedIdAsignatura = unidad.getId_asignatura();
 	    	 Asignatura asignatura = AsignaturaCRUD.getAsignaturaById(selectedIdAsignatura);
@@ -391,18 +358,17 @@ public class TareaCell extends ListCell<Tarea> {
 	    return dialog;
 	}
 
-	// --- 4. 封装跳转逻辑 ---
+	// --- 4. Salta a la pagina de tareaDetalleVista.fxml ---
     private void abrirVistaDetalle(Tarea tarea) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/tareaDetalleVista.fxml"));
             Parent view = loader.load();
 
-            // 获取 Controller 并传递数据
+            // Obtener el controller
             TareaDetalleController controller = loader.getController();
             controller.cargaDatosIniciarVista(tarea);
 
-            // 获取当前的 Scene Root 并进行切换
-            // getScene() 只有在 Cell 被添加到界面后才有效，点击时肯定有效
+            // Actualizar el contenido central del BorderPane
             if (getScene() != null) {
                 BorderPane rootPane = (BorderPane) getScene().getRoot();
                 rootPane.setCenter(view);
